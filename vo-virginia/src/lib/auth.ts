@@ -12,11 +12,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     MicrosoftEntraID({
       clientId: process.env.MICROSOFT_CLIENT_ID,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
       issuer: "https://login.microsoftonline.com/common/v2.0",
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
       name: "credentials",
@@ -73,5 +75,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   basePath: "/api/auth",
   trustHost: true,
-  debug: true,
 })
