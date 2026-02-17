@@ -1,10 +1,12 @@
-import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { getToken } from "next-auth/jwt"
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const isAuthenticated = !!req.auth
-  const userRole = req.auth?.user?.role
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+  const isAuthenticated = !!token
+  const userRole = token?.role as string | undefined
 
   const publicRoutes = ["/", "/entrar", "/cadastro"]
   const isPublicRoute = publicRoutes.some(
@@ -27,7 +29,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: [
