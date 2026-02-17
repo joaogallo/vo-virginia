@@ -80,11 +80,11 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto px-4 pb-8">
+    <div className="flex flex-col items-center gap-6 w-full max-w-4xl mx-auto px-4 pb-8">
       <ConfettiEffect isActive={showConfetti} />
 
       {/* Timer e Progresso */}
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full max-w-lg flex items-center justify-between">
         <GameTimer
           isRunning={!showingFeedback && !gameState.isComplete}
           resetKey={gameState.currentQuestion.id}
@@ -95,34 +95,38 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
       {/* Avatar */}
       <Avatar state={avatarState} />
 
-      {/* Carta da operação */}
-      <OperationCard
-        question={gameState.currentQuestion}
-        inputValue={inputValue}
-        feedbackType={feedbackType}
-        showingFeedback={showingFeedback}
-        currentAttempt={gameState.currentAttempt}
-        maxRetries={gameState.maxRetries}
-      />
+      {/* Card + Keypad: coluna no mobile, lado a lado no desktop */}
+      <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-10">
+        <div className="flex flex-col items-center gap-4">
+          <OperationCard
+            question={gameState.currentQuestion}
+            inputValue={inputValue}
+            feedbackType={feedbackType}
+            showingFeedback={showingFeedback}
+            currentAttempt={gameState.currentAttempt}
+            maxRetries={gameState.maxRetries}
+          />
 
-      {/* Feedback de toque para avançar */}
-      {showingFeedback && (
-        <button
-          onClick={() => advanceToNext()}
-          className="text-gray-400 text-sm animate-pulse cursor-pointer"
-        >
-          Toque para continuar
-        </button>
-      )}
+          {showingFeedback && (
+            <button
+              onClick={() => advanceToNext()}
+              className="text-gray-400 text-sm animate-pulse cursor-pointer"
+            >
+              Toque para continuar
+            </button>
+          )}
+        </div>
 
-      {/* Teclado Virtual */}
-      <VirtualKeypad
-        onDigit={appendDigit}
-        onBackspace={deleteDigit}
-        onClear={clearInput}
-        onConfirm={handleConfirm}
-        disabled={showingFeedback}
-      />
+        <div className="lg:pt-4">
+          <VirtualKeypad
+            onDigit={appendDigit}
+            onBackspace={deleteDigit}
+            onClear={clearInput}
+            onConfirm={handleConfirm}
+            disabled={showingFeedback}
+          />
+        </div>
+      </div>
     </div>
   )
 }
