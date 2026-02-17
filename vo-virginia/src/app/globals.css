@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-baloo);
+
+  --color-addition: #22c55e;
+  --color-addition-light: #bbf7d0;
+  --color-subtraction: #3b82f6;
+  --color-subtraction-light: #bfdbfe;
+  --color-multiplication: #f97316;
+  --color-multiplication-light: #fed7aa;
+  --color-division: #a855f7;
+  --color-division-light: #e9d5ff;
+  --color-correct: #22c55e;
+  --color-incorrect: #ef4444;
+}
+
+body {
+  background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #dbeafe 100%);
+  min-height: 100vh;
+  font-family: var(--font-sans);
+}
