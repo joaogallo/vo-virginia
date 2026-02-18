@@ -1,6 +1,6 @@
 # Roadmap — Vó Virgínia
 
-## v0.1.0 — MVP (Atual)
+## v0.1.0 — MVP (Concluído)
 
 - [x] Projeto Next.js com TypeScript e Tailwind CSS
 - [x] Game engine portado fielmente do Python
@@ -10,19 +10,24 @@
 - [x] Cronômetro por questão (reinicia em nova questão)
 - [x] Sistema de retentativas configurável (padrão 5)
 - [x] Seleção de operações e números a cada sessão
+- [x] Seletor de quantidade de questões (slider min 1, max total)
 - [x] Resumo de sessão com estatísticas
 - [x] Autenticação (email/senha, Google, Microsoft)
 - [x] Perfil do usuário com configuração de tentativas
 - [x] Página de estatísticas pessoais
 - [x] Dashboard de pais/professores
-- [x] Vinculação pai-filho por código
-- [x] API REST completa (sessões, respostas, estatísticas, filhos, perfil)
+- [x] Vinculação pai-filho por código (bidirecional, múltiplos adultos)
+- [x] Vinculação de adultos pelo perfil da criança
+- [x] API REST completa (sessões, respostas, estatísticas, filhos, perfil, vincular)
 - [x] Prisma schema com todos os modelos
+- [x] Imagem da Vó Virgínia na landing page e telas de jogo
+- [x] Layout responsivo com imagem decorativa à direita (desktop)
+- [x] Deploy no Vercel com Neon PostgreSQL
 - [x] Build compilando sem erros
 
 ## v0.2.0 — Avatar Lottie e Sons
 
-- [ ] Substituir emojis do avatar por animações Lottie (coruja ou personagem infantil)
+- [ ] Substituir imagem estática por animações Lottie
 - [ ] Animação Lottie de confete (substituir implementação CSS atual)
 - [ ] Efeitos sonoros de acerto/erro (com toggle para silenciar)
 - [ ] Som de comemoração ao completar sessão
@@ -90,4 +95,3 @@
 - [ ] Domínio personalizado
 - [ ] Termos de uso e política de privacidade (LGPD)
 - [ ] Documentação completa para contribuidores
-- [ ] Deploy de produção no Vercel

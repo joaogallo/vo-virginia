@@ -1,50 +1,56 @@
-# Kids Math Trainer
+# Vó Virgínia
 
-## Introduction
-Welcome to the Kids Math Trainer! This open-source project is designed to help children learn and practice basic arithmetic operations: addition (+), subtraction (-), multiplication (*), and division (/). Through a simple and interactive Python application, children can engage in a fun and educational experience.
+App web de prática de matemática para crianças de 6-11 anos (Ensino Fundamental I). Portado de um CLI Python para Next.js com autenticação, estatísticas e painel para pais/professores.
 
-## Features
-- Interactive arithmetic exercises
-- Customizable difficulty levels
-- Engaging for children
-- Simple and user-friendly interface
+**Acesse:** [vo-virginia.vercel.app](https://vo-virginia.vercel.app)
 
-## Installation
-To run Kids Math Trainer, you need to have Python installed on your computer. If you don't have Python installed, you can download it from [python.org](https://www.python.org/downloads/).
+## Stack
 
-Once Python is installed, you can clone the repository to your local machine. Open your terminal and run the following command:
+- **Framework**: Next.js 16 (App Router) + TypeScript
+- **Estilo**: Tailwind CSS v4 + fontes Nunito/Baloo 2
+- **Animações**: Framer Motion
+- **Estado**: Zustand (game state no cliente)
+- **Auth**: NextAuth.js v5 (credentials, Google, Microsoft Entra ID)
+- **ORM**: Prisma 6 + PostgreSQL (Neon)
+- **Deploy**: Vercel
 
+## Funcionalidades
+
+- Prática de adição, subtração, multiplicação e divisão
+- Seleção de operações, números e quantidade de questões por sessão
+- Formato reverso para subtração e divisão (evita negativos e decimais)
+- Sistema de retentativas configurável (padrão 5)
+- Feedback visual com animações e confete
+- Cronômetro por questão
+- Resumo de sessão com estatísticas
+- Autenticação por email/senha, Google e Microsoft
+- Perfil com configurações pessoais
+- Vinculação de crianças a múltiplos adultos (pais e professores) via código
+- Dashboard de pais/professores com estatísticas por criança
+- Imagem decorativa da Vó Virgínia nas telas de jogo
+- Layout responsivo (mobile e desktop)
+
+## Desenvolvimento
+
+```bash
+cd vo-virginia
+npm install
+npx prisma generate
+npm run dev
 ```
-git clone https://github.com/joaogallo/tabuada.git
+
+Variáveis de ambiente necessárias em `.env.local`:
+
+```env
+DATABASE_URL=
+AUTH_SECRET=
+AUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+MICROSOFT_CLIENT_ID=
+MICROSOFT_CLIENT_SECRET=
 ```
 
-Navigate to the cloned directory:
+## Licença
 
-```
-cd tabuada
-```
-
-## Running the Application
-To start the application, run the following command in your terminal:
-
-```
-python3 tabuada.py
-```
-
-The program will guide the user through a series of arithmetic problems, adjusting the difficulty based on their responses.
-
-## How to Contribute
-We welcome contributions from the community! Whether you're a developer, an educator, or just someone with good ideas, your input is valuable. Here are some ways you can contribute:
-- Reporting bugs
-- Suggesting enhancements
-- Adding new features
-- Improving documentation
-
-To contribute, please fork the repository and submit a pull request with your changes.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
-
-## Acknowledgments
-- Thanks to all contributors who have helped to make this project a reality.
-- Special thanks to the open-source community for ongoing support.
+MIT

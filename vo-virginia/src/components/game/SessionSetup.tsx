@@ -1,10 +1,8 @@
 "use client"
 
-import Image from "next/image"
 import { motion } from "framer-motion"
 import { useGameStore } from "@/stores/game-store"
 import { OPERATIONS, AVAILABLE_NUMBERS } from "@/constants/operations"
-import voTransparente from "@/media/vo-transparente.png"
 
 interface SessionSetupProps {
   onStart: () => void
@@ -27,24 +25,11 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-lg mx-auto px-4">
-      {/* Avatar */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-      >
-        <Image
-          src={voTransparente}
-          alt="Vó Virgínia"
-          width={120}
-          height={120}
-          className="mx-auto"
-          priority
-        />
-      </motion.div>
+      {/* Título */}
       <motion.h1
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="font-display text-3xl sm:text-4xl font-bold text-gray-800 text-center -mt-4"
+        className="font-display text-3xl sm:text-4xl font-bold text-gray-800 text-center"
       >
         Vó Virgínia
       </motion.h1>

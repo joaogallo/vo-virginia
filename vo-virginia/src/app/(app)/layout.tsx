@@ -22,7 +22,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Content */}
-      <main className="flex-1 flex flex-col items-center py-8">
+      <main className="flex-1 flex py-8">
         {children}
       </main>
     </div>
