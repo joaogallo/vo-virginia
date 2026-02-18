@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { signOut } from "next-auth/react"
 import { motion } from "framer-motion"
 
 interface Profile {
@@ -241,6 +242,16 @@ export default function PerfilPage() {
             </form>
           </div>
         )}
+
+        {/* Sair */}
+        <div className="border-t border-gray-100 pt-6 mt-6">
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="w-full py-3 rounded-xl border-2 border-red-200 text-red-600 font-display text-lg font-bold hover:bg-red-50 transition-colors cursor-pointer"
+          >
+            Sair da conta
+          </button>
+        </div>
       </motion.div>
     </div>
   )
