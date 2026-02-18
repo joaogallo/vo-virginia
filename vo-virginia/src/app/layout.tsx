@@ -19,6 +19,20 @@ export const metadata: Metadata = {
   title: "Vó Virgínia - Aprenda Matemática Brincando!",
   description:
     "Pratique adição, subtração, multiplicação e divisão de forma divertida com a Vó Virgínia!",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Vó Virgínia",
+    statusBarStyle: "default",
+  },
 }
 
 export default function RootLayout({
