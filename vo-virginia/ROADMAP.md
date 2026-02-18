@@ -18,6 +18,7 @@
 - [x] Dashboard de pais/professores
 - [x] Vinculação pai-filho por código (bidirecional, múltiplos adultos)
 - [x] Vinculação de adultos pelo perfil da criança
+- [x] Alteração de senha e criação de senha para usuários OAuth
 - [x] API REST completa (sessões, respostas, estatísticas, filhos, perfil, vincular)
 - [x] Prisma schema com todos os modelos
 - [x] Imagem da Vó Virgínia na landing page e telas de jogo

@@ -84,6 +84,8 @@ Config em `src/lib/auth.ts`. Usa JWT strategy (necessário para credentials prov
 
 API de registro em `src/app/api/auth/register/route.ts` — cria hash bcrypt, gera `linkCode` para pais/professores.
 
+API de alteração de senha em `src/app/api/auth/alterar-senha/route.ts` — permite criar senha (OAuth) ou alterar (credentials). Valida senha atual quando existe. Campo `passwordHash` é nullable no User.
+
 ### Vinculação de Adultos
 
 - Adultos (pais/professores) recebem `linkCode` ao se cadastrar, visível no perfil

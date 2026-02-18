@@ -20,10 +20,16 @@ export async function GET() {
       maxRetries: true,
       linkCode: true,
       createdAt: true,
+      passwordHash: true,
     },
   })
 
-  return NextResponse.json(user)
+  if (!user) {
+    return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 })
+  }
+
+  const { passwordHash, ...rest } = user
+  return NextResponse.json({ ...rest, hasPassword: !!passwordHash })
 }
 
 export async function PATCH(req: NextRequest) {

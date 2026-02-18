@@ -39,3 +39,8 @@ export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   maxRetries: z.number().int().min(1).max(20).optional(),
 })
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+})

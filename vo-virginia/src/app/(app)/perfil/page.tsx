@@ -11,6 +11,7 @@ interface Profile {
   role: string
   maxRetries: number
   linkCode: string | null
+  hasPassword: boolean
 }
 
 interface LinkedAdult {
@@ -31,6 +32,12 @@ export default function PerfilPage() {
   const [linkError, setLinkError] = useState("")
   const [linkSuccess, setLinkSuccess] = useState("")
   const [linking, setLinking] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [passwordSuccess, setPasswordSuccess] = useState("")
+  const [savingPassword, setSavingPassword] = useState(false)
 
   const fetchAdults = useCallback(() => {
     fetch("/api/vincular")
@@ -242,6 +249,104 @@ export default function PerfilPage() {
             </form>
           </div>
         )}
+
+        {/* Alterar / Criar senha */}
+        <div className="border-t border-gray-100 pt-6 mt-6">
+          <h2 className="font-display text-lg font-bold text-gray-700 mb-2">
+            {profile.hasPassword ? "Alterar senha" : "Criar senha"}
+          </h2>
+          {!profile.hasPassword && (
+            <p className="text-sm text-gray-500 mb-3">
+              Você entrou com Google ou Microsoft. Crie uma senha para também poder entrar com e-mail e senha.
+            </p>
+          )}
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              setPasswordError("")
+              setPasswordSuccess("")
+
+              if (newPassword.length < 6) {
+                setPasswordError("Senha deve ter pelo menos 6 caracteres")
+                return
+              }
+              if (newPassword !== confirmPassword) {
+                setPasswordError("As senhas não coincidem")
+                return
+              }
+
+              setSavingPassword(true)
+              const res = await fetch("/api/auth/alterar-senha", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ...(profile.hasPassword ? { currentPassword } : {}),
+                  newPassword,
+                }),
+              })
+              setSavingPassword(false)
+
+              if (res.ok) {
+                setPasswordSuccess(profile.hasPassword ? "Senha alterada!" : "Senha criada!")
+                setCurrentPassword("")
+                setNewPassword("")
+                setConfirmPassword("")
+                setProfile({ ...profile, hasPassword: true })
+                setTimeout(() => setPasswordSuccess(""), 3000)
+              } else {
+                const data = await res.json()
+                setPasswordError(data.error || "Erro ao salvar senha")
+              }
+            }}
+            className="flex flex-col gap-3"
+          >
+            {profile.hasPassword && (
+              <input
+                type="password"
+                placeholder="Senha atual"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
+              />
+            )}
+            <input
+              type="password"
+              placeholder="Nova senha"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={6}
+              className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
+            />
+            <input
+              type="password"
+              placeholder="Confirmar nova senha"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={6}
+              className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
+            />
+            {passwordError && (
+              <p className="text-red-500 text-sm text-center">{passwordError}</p>
+            )}
+            {passwordSuccess && (
+              <p className="text-green-600 text-sm text-center font-semibold">{passwordSuccess}</p>
+            )}
+            <button
+              type="submit"
+              disabled={savingPassword}
+              className="w-full bg-gradient-to-r from-green-400 to-green-600 text-white font-display text-lg font-bold rounded-xl py-3 shadow-lg disabled:opacity-50 cursor-pointer"
+            >
+              {savingPassword
+                ? "Salvando..."
+                : profile.hasPassword
+                  ? "Alterar senha"
+                  : "Criar senha"}
+            </button>
+          </form>
+        </div>
 
         {/* Sair */}
         <div className="border-t border-gray-100 pt-6 mt-6">

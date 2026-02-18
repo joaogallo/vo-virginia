@@ -24,25 +24,25 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
   const effectiveLimit = questionLimit !== null ? Math.min(questionLimit, total) : total
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-lg mx-auto px-4">
+    <div className="flex flex-col items-center gap-5 w-full max-w-lg mx-auto px-4">
       {/* Título */}
       <motion.h1
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="font-display text-3xl sm:text-4xl font-bold text-gray-800 text-center"
+        className="font-display text-2xl sm:text-3xl font-bold text-gray-800 text-center"
       >
         Vó Virgínia
       </motion.h1>
-      <p className="text-gray-600 text-center text-lg -mt-4">
+      <p className="text-gray-600 text-center -mt-3">
         Escolha o que você quer praticar!
       </p>
 
       {/* Operações */}
       <div className="w-full">
-        <h2 className="font-display text-xl font-bold text-gray-700 mb-3">
+        <h2 className="font-display text-lg font-bold text-gray-700 mb-2">
           Operações
         </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {OPERATIONS.map((op) => {
             const isSelected = selectedOperations.includes(op.value)
             return (
@@ -51,7 +51,7 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => toggleOperation(op.value)}
                 className={`
-                  rounded-2xl border-3 p-4 flex flex-col items-center gap-1
+                  rounded-2xl border-3 p-3 flex flex-col items-center gap-0.5
                   font-display text-lg font-bold transition-all duration-200
                   cursor-pointer select-none
                   ${
@@ -61,8 +61,8 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
                   }
                 `}
               >
-                <span className="text-3xl">{op.symbol}</span>
-                <span className="text-sm">{op.label}</span>
+                <span className="text-2xl">{op.symbol}</span>
+                <span className="text-xs">{op.label}</span>
               </motion.button>
             )
           })}
@@ -71,7 +71,7 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
 
       {/* Números */}
       <div className="w-full">
-        <h2 className="font-display text-xl font-bold text-gray-700 mb-3">
+        <h2 className="font-display text-lg font-bold text-gray-700 mb-2">
           Números
         </h2>
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
@@ -83,8 +83,8 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => toggleNumber(num)}
                 className={`
-                  rounded-xl w-14 h-14 flex items-center justify-center
-                  font-display text-xl font-bold transition-all duration-200
+                  rounded-xl w-12 h-12 flex items-center justify-center
+                  font-display text-lg font-bold transition-all duration-200
                   cursor-pointer select-none
                   ${
                     isSelected
@@ -107,7 +107,7 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
           animate={{ opacity: 1 }}
           className="w-full"
         >
-          <h2 className="font-display text-xl font-bold text-gray-700 mb-3">
+          <h2 className="font-display text-lg font-bold text-gray-700 mb-2">
             Quantidade de questões
           </h2>
           <div className="flex items-center gap-4">
@@ -122,11 +122,11 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
               }}
               className="flex-1 accent-green-500"
             />
-            <span className="font-display text-2xl font-bold text-gray-700 min-w-[3ch] text-right">
+            <span className="font-display text-xl font-bold text-gray-700 min-w-[3ch] text-right">
               {effectiveLimit}
             </span>
           </div>
-          <p className="text-gray-400 text-sm mt-1 text-center">
+          <p className="text-gray-400 text-xs mt-1 text-center">
             de {total} disponíveis
           </p>
         </motion.div>
@@ -139,8 +139,8 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
         onClick={canStart ? onStart : undefined}
         disabled={!canStart}
         className={`
-          w-full max-w-xs rounded-2xl py-4 px-8
-          font-display text-2xl font-bold
+          w-full max-w-xs rounded-2xl py-3 px-8
+          font-display text-xl font-bold
           transition-all duration-200 shadow-lg
           ${
             canStart

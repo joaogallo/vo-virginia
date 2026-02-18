@@ -24,6 +24,7 @@ App web de prática de matemática para crianças de 6-11 anos (Ensino Fundament
 - Cronômetro por questão
 - Resumo de sessão com estatísticas
 - Autenticação por email/senha, Google e Microsoft
+- Alteração e criação de senha (usuários OAuth podem criar senha para login por e-mail)
 - Perfil com configurações pessoais
 - Vinculação de crianças a múltiplos adultos (pais e professores) via código
 - Dashboard de pais/professores com estatísticas por criança
