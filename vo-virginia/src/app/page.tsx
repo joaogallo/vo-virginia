@@ -1,10 +1,19 @@
 import Link from "next/link"
+import Image from "next/image"
+import voNetos from "@/media/vo-netos.png"
 
 export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
       <div className="text-center max-w-lg">
-        <div className="text-8xl mb-6">🦉</div>
+        <Image
+          src={voNetos}
+          alt="Vó Virgínia com os netos"
+          width={280}
+          height={280}
+          className="mx-auto mb-6 rounded-3xl"
+          priority
+        />
         <h1 className="font-display text-5xl sm:text-6xl font-bold text-gray-800 mb-4">
           Vó Virgínia
         </h1>

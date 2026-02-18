@@ -1,17 +1,12 @@
 "use client"
 
+import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import type { AvatarState } from "@/types/game"
+import voTransparente from "@/media/vo-transparente.png"
 
 interface AvatarProps {
   state: AvatarState
-}
-
-const avatarEmojis: Record<AvatarState, string> = {
-  idle: "🦉",
-  thinking: "🤔",
-  correct: "🎉",
-  incorrect: "💪",
 }
 
 const avatarMessages: Record<AvatarState, string> = {
@@ -54,9 +49,14 @@ export default function Avatar({ state }: AvatarProps) {
             ...avatarAnimations[state],
           }}
           exit={{ scale: 0.8, opacity: 0 }}
-          className="text-6xl sm:text-7xl select-none"
+          className="select-none"
         >
-          {avatarEmojis[state]}
+          <Image
+            src={voTransparente}
+            alt="Vó Virgínia"
+            width={80}
+            height={80}
+          />
         </motion.div>
       </AnimatePresence>
       <AnimatePresence mode="wait">

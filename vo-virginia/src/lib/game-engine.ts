@@ -109,9 +109,13 @@ function buildQuestion(op: Operation, x: number, y: number): Question {
 export function createGameState(
   operations: Operation[],
   numbers: number[],
-  maxRetries: number
+  maxRetries: number,
+  maxQuestions?: number
 ): GameState {
-  const queue = generateQuestions(operations, numbers)
+  let queue = generateQuestions(operations, numbers)
+  if (maxQuestions && maxQuestions < queue.length) {
+    queue = queue.slice(0, maxQuestions)
+  }
   return {
     queue,
     currentQuestion: null,

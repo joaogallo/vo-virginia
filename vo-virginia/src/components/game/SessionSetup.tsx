@@ -1,8 +1,10 @@
 "use client"
 
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { useGameStore } from "@/stores/game-store"
 import { OPERATIONS, AVAILABLE_NUMBERS } from "@/constants/operations"
+import voTransparente from "@/media/vo-transparente.png"
 
 interface SessionSetupProps {
   onStart: () => void
@@ -12,21 +14,37 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
   const {
     selectedOperations,
     selectedNumbers,
+    questionLimit,
     toggleOperation,
     toggleNumber,
+    setQuestionLimit,
     totalQuestions,
   } = useGameStore()
 
   const canStart = selectedOperations.length > 0 && selectedNumbers.length > 0
   const total = totalQuestions()
+  const effectiveLimit = questionLimit !== null ? Math.min(questionLimit, total) : total
 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-lg mx-auto px-4">
-      {/* Título */}
+      {/* Avatar */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+      >
+        <Image
+          src={voTransparente}
+          alt="Vó Virgínia"
+          width={120}
+          height={120}
+          className="mx-auto"
+          priority
+        />
+      </motion.div>
       <motion.h1
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="font-display text-3xl sm:text-4xl font-bold text-gray-800 text-center"
+        className="font-display text-3xl sm:text-4xl font-bold text-gray-800 text-center -mt-4"
       >
         Vó Virgínia
       </motion.h1>
@@ -97,15 +115,36 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
         </div>
       </div>
 
-      {/* Info de questões */}
+      {/* Quantidade de questões */}
       {canStart && (
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-gray-500 text-center"
+          className="w-full"
         >
-          {total} questões para responder
-        </motion.p>
+          <h2 className="font-display text-xl font-bold text-gray-700 mb-3">
+            Quantidade de questões
+          </h2>
+          <div className="flex items-center gap-4">
+            <input
+              type="range"
+              min={1}
+              max={total}
+              value={effectiveLimit}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10)
+                setQuestionLimit(val === total ? null : val)
+              }}
+              className="flex-1 accent-green-500"
+            />
+            <span className="font-display text-2xl font-bold text-gray-700 min-w-[3ch] text-right">
+              {effectiveLimit}
+            </span>
+          </div>
+          <p className="text-gray-400 text-sm mt-1 text-center">
+            de {total} disponíveis
+          </p>
+        </motion.div>
       )}
 
       {/* Botão Começar */}

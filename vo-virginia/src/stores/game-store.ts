@@ -16,6 +16,7 @@ interface GameStore {
   // Setup
   selectedOperations: Operation[]
   selectedNumbers: number[]
+  questionLimit: number | null
 
   // Game state
   gameState: GameState | null
@@ -29,6 +30,7 @@ interface GameStore {
   // Setup actions
   toggleOperation: (op: Operation) => void
   toggleNumber: (num: number) => void
+  setQuestionLimit: (limit: number | null) => void
   resetSetup: () => void
 
   // Game actions
@@ -49,6 +51,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // Setup
   selectedOperations: [],
   selectedNumbers: [],
+  questionLimit: null,
 
   // Game state
   gameState: null,
@@ -78,10 +81,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return { selectedNumbers: [...nums, num] }
     }),
 
+  setQuestionLimit: (limit) => set({ questionLimit: limit }),
+
   resetSetup: () =>
     set({
       selectedOperations: [],
       selectedNumbers: [],
+      questionLimit: null,
       gameState: null,
       answerHistory: [],
       inputValue: "",
@@ -93,8 +99,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Game actions
   startSession: (maxRetries) => {
-    const { selectedOperations, selectedNumbers } = get()
-    const state = createGameState(selectedOperations, selectedNumbers, maxRetries)
+    const { selectedOperations, selectedNumbers, questionLimit } = get()
+    const state = createGameState(selectedOperations, selectedNumbers, maxRetries, questionLimit ?? undefined)
     const withQuestion = nextQuestion(state)
     set({
       gameState: withQuestion,
