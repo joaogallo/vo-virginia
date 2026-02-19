@@ -36,8 +36,10 @@ model User {
   accounts     Account[]
   authSessions AuthSession[]
   gameSessions GameSession[]
-  parents      ParentChild[] @relation("ChildToParent")
-  children     ParentChild[] @relation("ParentToChild")
+  parents          ParentChild[]      @relation("ChildToParent")
+  children         ParentChild[]      @relation("ParentToChild")
+  groups           ChildGroup[]       @relation("UserGroups")
+  groupMemberships ChildGroupMember[] @relation("GroupMemberships")
 
   @@map("users")
 }
@@ -93,6 +95,32 @@ model ParentChild {
 
   @@unique([parentId, childId])
   @@map("parent_child")
+}
+
+model ChildGroup {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User               @relation("UserGroups", fields: [userId], references: [id], onDelete: Cascade)
+  members ChildGroupMember[]
+
+  @@index([userId])
+  @@map("child_groups")
+}
+
+model ChildGroupMember {
+  id      String @id @default(cuid())
+  groupId String
+  childId String
+
+  group ChildGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  child User       @relation("GroupMemberships", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, childId])
+  @@map("child_group_members")
 }
 
 model GameSession {

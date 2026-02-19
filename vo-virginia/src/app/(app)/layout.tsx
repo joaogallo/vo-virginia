@@ -1,4 +1,5 @@
 import Link from "next/link"
+import NavLinks from "@/components/NavLinks"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,14 +11,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <span className="text-2xl">🦉</span>
             Vó Virgínia
           </Link>
-          <nav className="flex items-center gap-4">
-            <Link href="/estatisticas" className="text-sm font-semibold text-gray-600 hover:text-gray-800">
-              Estatísticas
-            </Link>
-            <Link href="/perfil" className="text-sm font-semibold text-gray-600 hover:text-gray-800">
-              Perfil
-            </Link>
-          </nav>
+          <NavLinks />
         </div>
       </header>
 

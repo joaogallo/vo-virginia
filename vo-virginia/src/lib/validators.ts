@@ -44,3 +44,15 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().optional(),
   newPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 })
+
+export const createGroupSchema = z.object({
+  name: z.string().min(1, "Nome do grupo é obrigatório").max(50, "Nome muito longo"),
+})
+
+export const addGroupMembersSchema = z.object({
+  childIds: z.array(z.string()).min(1, "Selecione pelo menos uma criança"),
+})
+
+export const removeGroupMemberSchema = z.object({
+  childId: z.string(),
+})

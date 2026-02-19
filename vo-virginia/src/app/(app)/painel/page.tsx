@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import GroupManager from "@/components/groups/GroupManager"
 
 interface Child {
   id: string
@@ -94,6 +95,13 @@ export default function PainelPage() {
                 </Link>
               </motion.div>
             ))}
+          </div>
+        )}
+
+        {/* Grupos */}
+        {children.length > 0 && (
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            <GroupManager children={children.map((c) => ({ id: c.id, name: c.name }))} />
           </div>
         )}
       </motion.div>
