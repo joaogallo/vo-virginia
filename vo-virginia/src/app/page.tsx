@@ -34,6 +34,14 @@ export default function HomePage() {
             Entrar
           </Link>
         </div>
+        <div className="mt-6">
+          <Link
+            href="/guia-pedagogico"
+            className="text-green-600 font-semibold hover:underline text-sm"
+          >
+            Guia Pedagógico para Educadores e Famílias
+          </Link>
+        </div>
       </div>
     </main>
   )
