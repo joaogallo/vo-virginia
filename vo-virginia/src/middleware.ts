@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
   const isAuthenticated = !!token
   const userRole = token?.role as string | undefined
 
-  const publicRoutes = ["/", "/entrar", "/cadastro"]
+  const publicRoutes = ["/", "/entrar", "/cadastro", "/guia-pedagogico"]
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   )
