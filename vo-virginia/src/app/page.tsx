@@ -42,6 +42,13 @@ export default function HomePage() {
             Guia Pedagógico para Educadores e Famílias
           </Link>
         </div>
+        <p className="mt-10 text-sm text-gray-400 italic leading-relaxed">
+          Feito em homenagem e memória da minha querida avó Virgínia
+          <br />
+          que tanto estudou comigo.
+          <br />
+          <span className="not-italic font-medium text-gray-500">— João Guilherme Gallo</span>
+        </p>
       </div>
     </main>
   )
