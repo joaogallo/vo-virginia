@@ -21,6 +21,7 @@ export interface GameState {
   sessionStartTime: number
   questionStartTime: number
   isComplete: boolean
+  sessionTotal: number
 }
 
 export interface AnswerRecord {

@@ -1,15 +1,34 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useGameStore } from "@/stores/game-store"
 import SessionSetup from "@/components/game/SessionSetup"
 
+interface UserProfile {
+  maxRetries: number
+  defaultQuestionLimit: number | null
+}
+
 export default function JogarPage() {
   const router = useRouter()
-  const startSession = useGameStore((s) => s.startSession)
+  const { startSession, setQuestionLimit, totalQuestions } = useGameStore()
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+
+  useEffect(() => {
+    fetch("/api/perfil")
+      .then((res) => res.json())
+      .then((data: UserProfile) => {
+        setProfile(data)
+        if (data.defaultQuestionLimit !== null) {
+          setQuestionLimit(data.defaultQuestionLimit)
+        }
+      })
+  }, [setQuestionLimit])
 
   const handleStart = () => {
-    startSession(5) // maxRetries padrão
+    const maxRetries = profile?.maxRetries ?? 5
+    startSession(maxRetries)
     router.push("/jogar/sessao")
   }
 

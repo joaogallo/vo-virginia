@@ -38,6 +38,7 @@ export const registerSchema = z.object({
 export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   maxRetries: z.number().int().min(1).max(20).optional(),
+  defaultQuestionLimit: z.number().int().min(1).max(500).nullable().optional(),
 })
 
 export const changePasswordSchema = z.object({

@@ -10,6 +10,7 @@ interface Profile {
   email: string
   role: string
   maxRetries: number
+  defaultQuestionLimit: number | null
   linkCode: string | null
   hasPassword: boolean
 }
@@ -25,6 +26,7 @@ interface LinkedAdult {
 export default function PerfilPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [maxRetries, setMaxRetries] = useState(5)
+  const [defaultQuestionLimit, setDefaultQuestionLimit] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [linkedAdults, setLinkedAdults] = useState<LinkedAdult[]>([])
@@ -53,6 +55,7 @@ export default function PerfilPage() {
       .then((data) => {
         setProfile(data)
         setMaxRetries(data.maxRetries)
+        setDefaultQuestionLimit(data.defaultQuestionLimit)
         if (data.role === "CHILD") fetchAdults()
       })
   }, [fetchAdults])
@@ -62,7 +65,7 @@ export default function PerfilPage() {
     await fetch("/api/perfil", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ maxRetries }),
+      body: JSON.stringify({ maxRetries, defaultQuestionLimit }),
     })
     setSaving(false)
     setSaved(true)
@@ -128,6 +131,44 @@ export default function PerfilPage() {
               </span>
               <button
                 onClick={() => setMaxRetries(Math.min(20, maxRetries + 1))}
+                className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="font-semibold text-gray-700">Questões por sessão</p>
+              <p className="text-sm text-gray-500">
+                Quantidade padrão ao iniciar uma sessão
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (defaultQuestionLimit === null) {
+                    setDefaultQuestionLimit(20)
+                  } else if (defaultQuestionLimit <= 5) {
+                    setDefaultQuestionLimit(null)
+                  } else {
+                    setDefaultQuestionLimit(defaultQuestionLimit - 5)
+                  }
+                }}
+                className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                -
+              </button>
+              <span className="font-display text-lg font-bold text-gray-800 min-w-[4ch] text-center">
+                {defaultQuestionLimit ?? "Todas"}
+              </span>
+              <button
+                onClick={() => {
+                  if (defaultQuestionLimit === null) return
+                  const next = defaultQuestionLimit + 5
+                  setDefaultQuestionLimit(next > 500 ? null : next)
+                }}
                 className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 +

@@ -27,9 +27,10 @@ model User {
   emailVerified DateTime?
   passwordHash  String?
   image         String?
-  role          UserRole  @default(CHILD)
-  maxRetries    Int       @default(5)
-  linkCode      String?   @unique
+  role                 UserRole  @default(CHILD)
+  maxRetries           Int       @default(5)
+  defaultQuestionLimit Int?
+  linkCode             String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

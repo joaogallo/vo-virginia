@@ -26,14 +26,12 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
     clearInput,
     confirmAnswer,
     advanceToNext,
-    questionsAnswered,
-    totalQuestions,
   } = useGameStore()
 
   const [showConfetti, setShowConfetti] = useState(false)
 
-  const total = totalQuestions()
-  const answered = questionsAnswered()
+  const total = gameState?.sessionTotal ?? 0
+  const answered = gameState?.correctCount ?? 0
 
   const handleConfirm = useCallback(() => {
     if (showingFeedback) {

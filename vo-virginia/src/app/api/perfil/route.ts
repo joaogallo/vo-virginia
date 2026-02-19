@@ -18,6 +18,7 @@ export async function GET() {
       image: true,
       role: true,
       maxRetries: true,
+      defaultQuestionLimit: true,
       linkCode: true,
       createdAt: true,
       passwordHash: true,
@@ -53,6 +54,7 @@ export async function PATCH(req: NextRequest) {
       email: true,
       role: true,
       maxRetries: true,
+      defaultQuestionLimit: true,
     },
   })
 

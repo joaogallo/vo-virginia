@@ -126,6 +126,7 @@ export function createGameState(
     sessionStartTime: Date.now(),
     questionStartTime: Date.now(),
     isComplete: false,
+    sessionTotal: queue.length,
   }
 }
 
