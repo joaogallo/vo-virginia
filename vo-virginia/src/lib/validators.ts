@@ -3,6 +3,7 @@ import { z } from "zod"
 export const createSessionSchema = z.object({
   operations: z.array(z.enum(["ADDITION", "SUBTRACTION", "MULTIPLICATION", "DIVISION"])).min(1),
   numbers: z.array(z.number().int()).min(1),
+  totalQuestions: z.number().int().min(1).optional(),
 })
 
 export const endSessionSchema = z.object({

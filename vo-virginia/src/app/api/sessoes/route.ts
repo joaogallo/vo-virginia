@@ -15,15 +15,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { operations, numbers } = parsed.data
+  const { operations, numbers, totalQuestions: clientTotal } = parsed.data
 
-  // Calcular total de questões
-  let totalQuestions = 0
-  for (const op of operations) {
-    for (const x of numbers) {
-      for (let y = 0; y <= 10; y++) {
-        if (op === "DIVISION" && x === 0) continue
-        totalQuestions++
+  // Usar total do cliente se fornecido, senão calcular
+  let totalQuestions = clientTotal ?? 0
+  if (!clientTotal) {
+    for (const op of operations) {
+      for (const x of numbers) {
+        for (let y = 0; y <= 10; y++) {
+          if (op === "DIVISION" && x === 0) continue
+          totalQuestions++
+        }
       }
     }
   }
