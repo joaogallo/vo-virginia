@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import SessionList, { type SessionItem } from "./SessionList"
 
 export interface Stats {
   totalSessions: number
@@ -13,6 +14,7 @@ export interface Stats {
     string,
     { total: number; correct: number; accuracyPercent: number; averageTimeMs: number }
   >
+  recentSessions?: SessionItem[]
 }
 
 const operationLabels: Record<string, { label: string; color: string; icon: string }> = {
@@ -116,6 +118,13 @@ export default function StatsDisplay({ stats, compact = false }: StatsDisplayPro
           )
         })}
       </div>
+
+      {/* Sessões recentes */}
+      {stats.recentSessions && stats.recentSessions.length > 0 && (
+        <div className="mt-6">
+          <SessionList sessions={stats.recentSessions} compact={compact} />
+        </div>
+      )}
     </div>
   )
 }

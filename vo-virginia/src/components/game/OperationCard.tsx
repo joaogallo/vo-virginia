@@ -72,8 +72,8 @@ export default function OperationCard({
           </span>
         </div>
 
-        {/* Operação (centro-direita) */}
-        <div className="flex-1 flex items-center justify-end w-full pr-4">
+        {/* Operação (centro-esquerda) */}
+        <div className="flex-1 flex items-center justify-start w-full pl-4">
           <span className={`font-display text-5xl sm:text-6xl font-bold ${colors.text}`}>
             {question.operationSymbol}
           </span>
