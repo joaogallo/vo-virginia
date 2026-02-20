@@ -62,7 +62,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
     onBackspace: deleteDigit,
     onClear: clearInput,
     onConfirm: handleConfirm,
-    enabled: !!gameState?.currentQuestion,
+    enabled: !!gameState?.currentQuestion || showingFeedback,
   })
 
   // Avançar automaticamente após feedback (timeout)
@@ -83,7 +83,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
     }
   }, [gameState?.isComplete, onSessionComplete])
 
-  if (!gameState || !gameState.currentQuestion) {
+  if (!gameState || (!gameState.currentQuestion && !showingFeedback)) {
     return null
   }
 
@@ -95,7 +95,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
       <div className="w-full max-w-lg flex items-center justify-between">
         <GameTimer
           isRunning={!showingFeedback && !gameState.isComplete}
-          resetKey={gameState.currentQuestion.id}
+          resetKey={gameState.currentQuestion?.id ?? ""}
         />
         <div className="flex items-center gap-3">
           <GameProgress answered={answered} total={total} />
@@ -116,7 +116,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
       <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-10">
         <div className="flex flex-col items-center gap-4">
           <OperationCard
-            question={gameState.currentQuestion}
+            question={gameState.currentQuestion!}
             inputValue={inputValue}
             feedbackType={feedbackType}
             showingFeedback={showingFeedback}

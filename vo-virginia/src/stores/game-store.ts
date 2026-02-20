@@ -26,6 +26,7 @@ interface GameStore {
   feedbackType: FeedbackType
   avatarState: AvatarState
   lastCorrectAnswer: number | null
+  needsAdvance: boolean
 
   // Setup actions
   toggleOperation: (op: Operation) => void
@@ -61,6 +62,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   feedbackType: null,
   avatarState: "idle",
   lastCorrectAnswer: null,
+  needsAdvance: false,
 
   // Setup actions
   toggleOperation: (op) =>
@@ -95,6 +97,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       feedbackType: null,
       avatarState: "idle",
       lastCorrectAnswer: null,
+      needsAdvance: false,
     }),
 
   // Game actions
@@ -110,6 +113,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       feedbackType: null,
       avatarState: "idle",
       lastCorrectAnswer: null,
+      needsAdvance: false,
     })
   },
 
@@ -161,8 +165,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       answeredAt: new Date().toISOString(),
     }
 
+    // Preservar currentQuestion durante o feedback para que o card continue visível.
+    // submitAnswer seta currentQuestion=null quando acerta ou esgota tentativas,
+    // mas o GameContainer precisa da questão para renderizar o card com o feedback.
+    const shouldAdvance = result.wasCorrect || result.exhaustedRetries
     set({
-      gameState: result.newState,
+      gameState: {
+        ...result.newState,
+        currentQuestion: shouldAdvance ? gameState.currentQuestion : result.newState.currentQuestion,
+      },
+      needsAdvance: shouldAdvance,
       answerHistory: [...get().answerHistory, record],
       inputValue: "",
       showingFeedback: true,
@@ -179,14 +191,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   advanceToNext: () => {
-    const { gameState } = get()
+    const { gameState, needsAdvance } = get()
     if (!gameState) return
 
-    if (gameState.currentQuestion === null) {
-      // Precisa avançar para próxima questão
-      const newState = nextQuestion(gameState)
+    if (needsAdvance) {
+      // Acertou ou esgotou tentativas: avançar para próxima questão
+      const stateForNext = { ...gameState, currentQuestion: null }
+      const newState = nextQuestion(stateForNext)
       set({
         gameState: newState,
+        needsAdvance: false,
         inputValue: "",
         showingFeedback: false,
         feedbackType: null,
@@ -196,6 +210,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } else {
       // Retentativa na mesma questão (erro sem esgotar tentativas)
       set({
+        needsAdvance: false,
         inputValue: "",
         showingFeedback: false,
         feedbackType: null,
