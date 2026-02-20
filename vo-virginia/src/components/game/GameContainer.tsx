@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useGameStore } from "@/stores/game-store"
 import { useKeyboardInput } from "@/hooks/useKeyboardInput"
+import { useSound } from "@/hooks/useSound"
 import OperationCard from "./OperationCard"
 import VirtualKeypad from "./VirtualKeypad"
 import GameTimer from "./GameTimer"
@@ -30,6 +31,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
 
   const [showConfetti, setShowConfetti] = useState(false)
   const feedbackStartRef = useRef<number>(0)
+  const { playCorrect, playIncorrect, isMuted, toggleMute } = useSound()
 
   const total = gameState?.sessionTotal ?? 0
   const answered = gameState?.correctCount ?? 0
@@ -45,11 +47,14 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
     if (result) {
       feedbackStartRef.current = Date.now()
       if (result.wasCorrect) {
+        playCorrect()
         setShowConfetti(true)
         setTimeout(() => setShowConfetti(false), 2500)
+      } else {
+        playIncorrect()
       }
     }
-  }, [showingFeedback, confirmAnswer, advanceToNext])
+  }, [showingFeedback, confirmAnswer, advanceToNext, playCorrect, playIncorrect])
 
   // Keyboard input
   useKeyboardInput({
@@ -86,13 +91,22 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
     <div className="flex flex-col items-center gap-6 w-full max-w-4xl mx-auto px-4 pb-8">
       <ConfettiEffect isActive={showConfetti} />
 
-      {/* Timer e Progresso */}
+      {/* Timer, Progresso e Mudo */}
       <div className="w-full max-w-lg flex items-center justify-between">
         <GameTimer
           isRunning={!showingFeedback && !gameState.isComplete}
           resetKey={gameState.currentQuestion.id}
         />
-        <GameProgress answered={answered} total={total} />
+        <div className="flex items-center gap-3">
+          <GameProgress answered={answered} total={total} />
+          <button
+            onClick={toggleMute}
+            className="text-gray-400 hover:text-gray-600 transition-colors text-xl cursor-pointer"
+            aria-label={isMuted ? "Ativar som" : "Silenciar"}
+          >
+            {isMuted ? "\u{1F507}" : "\u{1F50A}"}
+          </button>
+        </div>
       </div>
 
       {/* Avatar */}

@@ -1,8 +1,11 @@
 "use client"
 
+import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { useGameStore } from "@/stores/game-store"
+import { useSound } from "@/hooks/useSound"
 import ConfettiEffect from "./ConfettiEffect"
+import LottieAnimation from "./LottieAnimation"
 
 interface SessionSummaryProps {
   onPlayAgain: () => void
@@ -11,6 +14,11 @@ interface SessionSummaryProps {
 
 export default function SessionSummary({ onPlayAgain, onGoHome }: SessionSummaryProps) {
   const { gameState, answerHistory } = useGameStore()
+  const { playComplete } = useSound()
+
+  useEffect(() => {
+    playComplete()
+  }, [playComplete])
 
   const totalTime = gameState
     ? Math.round((Date.now() - gameState.sessionStartTime) / 1000)
@@ -38,9 +46,13 @@ export default function SessionSummary({ onPlayAgain, onGoHome }: SessionSummary
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-        className="text-7xl"
+        className="w-28 h-28"
       >
-        🏆
+        <LottieAnimation
+          src="/animations/trophy.json"
+          loop={false}
+          className="w-full h-full"
+        />
       </motion.div>
 
       <motion.h1

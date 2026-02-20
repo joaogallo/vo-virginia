@@ -35,19 +35,22 @@ export default function OperationCard({
     <AnimatePresence mode="wait">
       <motion.div
         key={question.id + (showCorrectResult ? "-result" : "")}
-        initial={{ x: 120, opacity: 0, rotate: 5 }}
+        initial={{ x: 80, opacity: 0, scale: 0.92, rotate: 3 }}
         animate={
           showingFeedback && feedbackType === "incorrect"
             ? {
-                x: [0, -12, 12, -12, 12, 0],
+                x: [0, -10, 10, -10, 10, 0],
                 opacity: 1,
+                scale: 1,
                 rotate: 0,
-                transition: { x: { duration: 0.5 }, opacity: { duration: 0.3 } },
+                transition: { x: { duration: 0.4 }, opacity: { duration: 0.2 }, scale: { duration: 0.2 } },
               }
-            : { x: 0, opacity: 1, rotate: 0 }
+            : showingFeedback && feedbackType === "correct"
+              ? { x: 0, opacity: 1, scale: [1, 1.03, 1], rotate: 0 }
+              : { x: 0, opacity: 1, scale: 1, rotate: 0 }
         }
-        exit={{ x: -120, opacity: 0, rotate: -5 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        exit={{ x: -80, opacity: 0, scale: 0.92, rotate: -3 }}
+        transition={{ type: "spring", stiffness: 260, damping: 22 }}
         className={`
           relative w-64 sm:w-72 md:w-80
           rounded-3xl border-4 ${colors.border} ${colors.bg}
