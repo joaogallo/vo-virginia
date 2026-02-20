@@ -15,17 +15,78 @@ const avatarMessages: Record<AvatarState, { text: string; color: string }> = {
   incorrect: { text: "Tente de novo!", color: "text-red-500" },
 }
 
-const avatarAnimations: Record<AvatarState, { src: string; loop: boolean }> = {
-  idle: { src: "/animations/idle.json", loop: true },
-  thinking: { src: "/animations/thinking.json", loop: true },
-  correct: { src: "/animations/correct.json", loop: false },
-  incorrect: { src: "/animations/incorrect.json", loop: false },
+function CorrectIcon() {
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <motion.circle
+        cx="50"
+        cy="50"
+        r="44"
+        fill="none"
+        stroke="#22c55e"
+        strokeWidth="6"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      />
+      <motion.path
+        d="M30 52 L44 66 L72 36"
+        fill="none"
+        stroke="#22c55e"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.3, delay: 0.3, ease: "easeOut" }}
+      />
+    </svg>
+  )
+}
+
+function IncorrectIcon() {
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <motion.circle
+        cx="50"
+        cy="50"
+        r="44"
+        fill="none"
+        stroke="#ef4444"
+        strokeWidth="6"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      />
+      <motion.path
+        d="M35 35 L65 65"
+        fill="none"
+        stroke="#ef4444"
+        strokeWidth="7"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.25, delay: 0.25, ease: "easeOut" }}
+      />
+      <motion.path
+        d="M65 35 L35 65"
+        fill="none"
+        stroke="#ef4444"
+        strokeWidth="7"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.25, delay: 0.4, ease: "easeOut" }}
+      />
+    </svg>
+  )
 }
 
 const isFeedback = (state: AvatarState) => state === "correct" || state === "incorrect"
 
 export default function Avatar({ state }: AvatarProps) {
-  const anim = avatarAnimations[state]
   const msg = avatarMessages[state]
   const feedback = isFeedback(state)
 
@@ -41,13 +102,19 @@ export default function Avatar({ state }: AvatarProps) {
             ? { type: "spring", stiffness: 400, damping: 15 }
             : { duration: 0.2 }
           }
-          className={feedback ? "w-28 h-28 sm:w-32 sm:h-32" : "w-16 h-16"}
+          className={feedback ? "w-24 h-24 sm:w-28 sm:h-28" : "w-16 h-16"}
         >
-          <LottieAnimation
-            src={anim.src}
-            loop={anim.loop}
-            className="w-full h-full"
-          />
+          {state === "correct" ? (
+            <CorrectIcon />
+          ) : state === "incorrect" ? (
+            <IncorrectIcon />
+          ) : (
+            <LottieAnimation
+              src={state === "thinking" ? "/animations/thinking.json" : "/animations/idle.json"}
+              loop
+              className="w-full h-full"
+            />
+          )}
         </motion.div>
       </AnimatePresence>
       <AnimatePresence mode="wait">
