@@ -71,7 +71,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
 
     const timeout = setTimeout(() => {
       advanceToNext()
-    }, feedbackType === "correct" ? 2000 : 1500)
+    }, feedbackType === "correct" ? 3000 : 2000)
 
     return () => clearTimeout(timeout)
   }, [showingFeedback, feedbackType, advanceToNext])
