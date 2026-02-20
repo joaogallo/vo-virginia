@@ -34,7 +34,7 @@ export default function OperationCard({
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={question.id + (showCorrectResult ? "-result" : "")}
+        key={question.id}
         initial={{ x: 80, opacity: 0, scale: 0.92, rotate: 3 }}
         animate={
           showingFeedback && feedbackType === "incorrect"

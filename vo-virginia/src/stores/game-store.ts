@@ -11,6 +11,7 @@ import {
   nextQuestion,
   submitAnswer,
 } from "@/lib/game-engine"
+import type { PersistedSession } from "@/lib/session-storage"
 
 interface GameStore {
   // Setup
@@ -28,6 +29,10 @@ interface GameStore {
   lastCorrectAnswer: number | null
   needsAdvance: boolean
 
+  // Persistence
+  backendSessionId: string | null
+  syncedAnswerCount: number
+
   // Setup actions
   toggleOperation: (op: Operation) => void
   toggleNumber: (num: number) => void
@@ -42,6 +47,11 @@ interface GameStore {
   confirmAnswer: () => { wasCorrect: boolean; correctAnswer: number; exhaustedRetries: boolean } | null
   advanceToNext: () => void
   endSession: () => void
+
+  // Persistence actions
+  setBackendSessionId: (id: string) => void
+  setSyncedAnswerCount: (count: number) => void
+  restoreSession: (persisted: PersistedSession) => void
 
   // Computed helpers
   totalQuestions: () => number
@@ -63,6 +73,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   avatarState: "idle",
   lastCorrectAnswer: null,
   needsAdvance: false,
+
+  // Persistence
+  backendSessionId: null,
+  syncedAnswerCount: 0,
 
   // Setup actions
   toggleOperation: (op) =>
@@ -98,6 +112,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       avatarState: "idle",
       lastCorrectAnswer: null,
       needsAdvance: false,
+      backendSessionId: null,
+      syncedAnswerCount: 0,
     }),
 
   // Game actions
@@ -114,6 +130,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       avatarState: "idle",
       lastCorrectAnswer: null,
       needsAdvance: false,
+      backendSessionId: null,
+      syncedAnswerCount: 0,
     })
   },
 
@@ -220,6 +238,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  // Persistence actions
+  setBackendSessionId: (id) => set({ backendSessionId: id }),
+  setSyncedAnswerCount: (count) => set({ syncedAnswerCount: count }),
+
+  restoreSession: (persisted) =>
+    set({
+      selectedOperations: persisted.selectedOperations,
+      selectedNumbers: persisted.selectedNumbers,
+      questionLimit: persisted.questionLimit,
+      backendSessionId: persisted.backendSessionId,
+      syncedAnswerCount: persisted.syncedAnswerCount,
+      answerHistory: persisted.answerHistory,
+      gameState: {
+        queue: persisted.queue,
+        currentQuestion: persisted.currentQuestion,
+        currentAttempt: persisted.currentAttempt,
+        correctCount: persisted.correctCount,
+        wrongCount: persisted.wrongCount,
+        maxRetries: persisted.maxRetries,
+        sessionStartTime: persisted.sessionStartTime,
+        questionStartTime: Date.now(),
+        isComplete: false,
+        sessionTotal: persisted.sessionTotal,
+      },
+      inputValue: "",
+      showingFeedback: false,
+      feedbackType: null,
+      avatarState: "idle",
+      lastCorrectAnswer: null,
+      needsAdvance: false,
+    }),
+
   endSession: () =>
     set({
       gameState: null,
@@ -227,6 +277,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showingFeedback: false,
       feedbackType: null,
       avatarState: "idle",
+      backendSessionId: null,
+      syncedAnswerCount: 0,
     }),
 
   totalQuestions: () => {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { calculateStats, periodToDate } from "@/lib/stats-calculator"
 
 export async function GET(
   req: NextRequest,
@@ -22,50 +23,26 @@ export async function GET(
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 })
   }
 
+  const period = req.nextUrl.searchParams.get("period") || "all"
+  const sinceDate = periodToDate(period)
+
+  const dateFilter = sinceDate ? { gte: sinceDate } : undefined
+
   const [sessions, answers] = await Promise.all([
     prisma.gameSession.findMany({
-      where: { userId: childId },
+      where: {
+        userId: childId,
+        ...(dateFilter && { startedAt: dateFilter }),
+      },
       orderBy: { startedAt: "desc" },
-      take: 20,
     }),
     prisma.answer.findMany({
-      where: { session: { userId: childId } },
+      where: {
+        session: { userId: childId },
+        ...(dateFilter && { answeredAt: dateFilter }),
+      },
     }),
   ])
 
-  const totalSessions = sessions.length
-  const totalQuestions = answers.length
-  const totalCorrect = answers.filter((a) => a.isCorrect).length
-  const totalWrong = answers.filter((a) => !a.isCorrect).length
-  const accuracyPercent = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0
-  const averageTimeMs = totalQuestions > 0
-    ? Math.round(answers.reduce((sum, a) => sum + a.timeSpentMs, 0) / totalQuestions)
-    : 0
-
-  const operations = ["ADDITION", "SUBTRACTION", "MULTIPLICATION", "DIVISION"] as const
-  const byOperation: Record<string, { total: number; correct: number; accuracyPercent: number; averageTimeMs: number }> = {}
-
-  for (const op of operations) {
-    const opAnswers = answers.filter((a) => a.operation === op)
-    const opCorrect = opAnswers.filter((a) => a.isCorrect).length
-    byOperation[op] = {
-      total: opAnswers.length,
-      correct: opCorrect,
-      accuracyPercent: opAnswers.length > 0 ? Math.round((opCorrect / opAnswers.length) * 100) : 0,
-      averageTimeMs: opAnswers.length > 0
-        ? Math.round(opAnswers.reduce((sum, a) => sum + a.timeSpentMs, 0) / opAnswers.length)
-        : 0,
-    }
-  }
-
-  return NextResponse.json({
-    totalSessions,
-    totalQuestions,
-    totalCorrect,
-    totalWrong,
-    accuracyPercent,
-    averageTimeMs,
-    byOperation,
-    recentSessions: sessions,
-  })
+  return NextResponse.json(calculateStats(sessions, answers))
 }

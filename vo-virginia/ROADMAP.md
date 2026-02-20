@@ -28,18 +28,18 @@
 
 ## v0.2.0 — Avatar Lottie e Sons
 
-- [ ] Substituir imagem estática por animações Lottie
-- [ ] Animação Lottie de confete (substituir implementação CSS atual)
-- [ ] Efeitos sonoros de acerto/erro (com toggle para silenciar)
-- [ ] Som de comemoração ao completar sessão
-- [ ] Animação de transição entre questões mais elaborada
+- [x] Substituir imagem estática por animações Lottie
+- [x] Animação Lottie de confete (substituir implementação CSS atual)
+- [x] Efeitos sonoros de acerto/erro (com toggle para silenciar)
+- [x] Som de comemoração ao completar sessão
+- [x] Animação de transição entre questões mais elaborada
 
 ## v0.3.0 — Persistência e Recuperação
 
-- [ ] Salvar estado da sessão em `localStorage` a cada resposta
-- [ ] Recuperar sessão interrompida ao abrir o app
-- [ ] Enviar respostas ao backend periodicamente (não só ao final)
-- [ ] Indicador de "salvando..." durante envio
+- [x] Salvar estado da sessão em `localStorage` a cada resposta
+- [x] Recuperar sessão interrompida ao abrir o app
+- [x] Enviar respostas ao backend periodicamente (não só ao final)
+- [x] Indicador de "salvando..." durante envio
 
 ## v0.4.0 — Estatísticas Avançadas
 

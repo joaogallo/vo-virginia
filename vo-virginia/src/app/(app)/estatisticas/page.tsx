@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import StatsDisplay, { type Stats } from "@/components/stats/StatsDisplay"
+import type { Period } from "@/components/stats/PeriodFilter"
 
 interface Child {
   id: string
@@ -25,6 +26,7 @@ export default function EstatisticasPage() {
   const [children, setChildren] = useState<Child[]>([])
   const [groups, setGroups] = useState<GroupWithMembers[]>([])
   const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState<Period>("all")
 
   const [selectedGroup, setSelectedGroup] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -34,10 +36,12 @@ export default function EstatisticasPage() {
 
   const isAdult = session?.user?.role === "PARENT" || session?.user?.role === "TEACHER"
 
+  const fetchOwnStats = useCallback((p: Period) => {
+    return fetch(`/api/estatisticas?period=${p}`).then((r) => r.json()).then(setOwnStats)
+  }, [])
+
   useEffect(() => {
-    const fetches: Promise<unknown>[] = [
-      fetch("/api/estatisticas").then((r) => r.json()).then(setOwnStats),
-    ]
+    const fetches: Promise<unknown>[] = [fetchOwnStats(period)]
 
     if (isAdult) {
       fetches.push(
@@ -47,16 +51,21 @@ export default function EstatisticasPage() {
     }
 
     Promise.all(fetches).then(() => setLoading(false))
-  }, [isAdult])
+  }, [isAdult, fetchOwnStats, period])
+
+  const handlePeriodChange = (p: Period) => {
+    setPeriod(p)
+    setChildStatsCache({})
+  }
 
   const fetchChildStats = useCallback(async (childId: string) => {
     if (childStatsCache[childId]) return
     setLoadingChildId(childId)
-    const res = await fetch(`/api/estatisticas/${childId}`)
+    const res = await fetch(`/api/estatisticas/${childId}?period=${period}`)
     const data = await res.json()
     setChildStatsCache((prev) => ({ ...prev, [childId]: data }))
     setLoadingChildId(null)
-  }, [childStatsCache])
+  }, [childStatsCache, period])
 
   const handleToggleChild = (childId: string) => {
     if (expandedChildId === childId) {
@@ -91,7 +100,13 @@ export default function EstatisticasPage() {
           {isAdult ? "Estatísticas" : "Minhas Estatísticas"}
         </h1>
 
-        {ownStats && !isAdult && <StatsDisplay stats={ownStats} />}
+        {ownStats && !isAdult && (
+          <StatsDisplay
+            stats={ownStats}
+            period={period}
+            onPeriodChange={handlePeriodChange}
+          />
+        )}
 
         {/* Seção de crianças para adultos */}
         {isAdult && (
@@ -184,7 +199,7 @@ export default function EstatisticasPage() {
                                     <div className="animate-spin w-6 h-6 border-3 border-green-400 border-t-transparent rounded-full" />
                                   </div>
                                 ) : cachedStats ? (
-                                  <StatsDisplay stats={cachedStats} compact />
+                                  <StatsDisplay stats={cachedStats} compact period={period} onPeriodChange={handlePeriodChange} />
                                 ) : null}
                               </div>
                             </motion.div>

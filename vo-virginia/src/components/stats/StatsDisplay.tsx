@@ -2,6 +2,33 @@
 
 import { motion } from "framer-motion"
 import SessionList, { type SessionItem } from "./SessionList"
+import AccuracyChart from "./AccuracyChart"
+import TimeByOperationChart from "./TimeByOperationChart"
+import BestSessions from "./BestSessions"
+import PeriodFilter, { type Period } from "./PeriodFilter"
+import ExportPdfButton from "./ExportPdfButton"
+
+interface DailyProgress {
+  date: string
+  total: number
+  correct: number
+  accuracyPercent: number
+}
+
+interface AvgTimeByOperation {
+  operation: string
+  averageTimeMs: number
+}
+
+interface BestSessionItem {
+  id: string
+  startedAt: string
+  operations: string[]
+  accuracyPercent: number
+  totalQuestions: number
+  correctAnswers: number
+  totalTimeMs: number
+}
 
 export interface Stats {
   totalSessions: number
@@ -15,6 +42,9 @@ export interface Stats {
     { total: number; correct: number; accuracyPercent: number; averageTimeMs: number }
   >
   recentSessions?: SessionItem[]
+  dailyProgress?: DailyProgress[]
+  avgTimeByOperation?: AvgTimeByOperation[]
+  bestSessions?: BestSessionItem[]
 }
 
 const operationLabels: Record<string, { label: string; color: string; icon: string }> = {
@@ -27,18 +57,27 @@ const operationLabels: Record<string, { label: string; color: string; icon: stri
 interface StatsDisplayProps {
   stats: Stats
   compact?: boolean
+  period?: Period
+  onPeriodChange?: (period: Period) => void
 }
 
-export default function StatsDisplay({ stats, compact = false }: StatsDisplayProps) {
+export default function StatsDisplay({ stats, compact = false, period, onPeriodChange }: StatsDisplayProps) {
   const avgTimeSec = Math.round(stats.averageTimeMs / 1000)
 
   if (stats.totalQuestions === 0) {
     return (
-      <div className="bg-white rounded-3xl shadow-xl p-8 text-center">
-        <div className="text-5xl mb-4">📊</div>
-        <p className="text-gray-500 text-lg">
-          Nenhuma questão respondida ainda.
-        </p>
+      <div>
+        {period && onPeriodChange && (
+          <div className="flex items-center justify-between mb-4">
+            <PeriodFilter value={period} onChange={onPeriodChange} />
+          </div>
+        )}
+        <div className="bg-white rounded-3xl shadow-xl p-8 text-center">
+          <div className="text-5xl mb-4">📊</div>
+          <p className="text-gray-500 text-lg">
+            Nenhuma questão respondida{period !== "all" ? " neste período" : " ainda"}.
+          </p>
+        </div>
       </div>
     )
   }
@@ -54,6 +93,14 @@ export default function StatsDisplay({ stats, compact = false }: StatsDisplayPro
 
   return (
     <div>
+      {/* Filtro de período + Export */}
+      {period && onPeriodChange && (
+        <div className="flex items-center justify-between mb-4 print:hidden">
+          <PeriodFilter value={period} onChange={onPeriodChange} />
+          <ExportPdfButton />
+        </div>
+      )}
+
       {/* Cards resumo */}
       <div className={`grid grid-cols-2 ${compact ? "sm:grid-cols-3" : ""} gap-3 mb-6`}>
         {cards.map((item, i) => (
@@ -72,6 +119,16 @@ export default function StatsDisplay({ stats, compact = false }: StatsDisplayPro
           </motion.div>
         ))}
       </div>
+
+      {/* Gráfico de evolução de precisão */}
+      {stats.dailyProgress && stats.dailyProgress.length > 0 && (
+        <div className="mb-6">
+          <h3 className="font-display text-lg font-bold text-gray-700 mb-3">
+            Evolução de Precisão
+          </h3>
+          <AccuracyChart data={stats.dailyProgress} />
+        </div>
+      )}
 
       {/* Por operação */}
       <h3 className="font-display text-lg font-bold text-gray-700 mb-3">
@@ -119,10 +176,27 @@ export default function StatsDisplay({ stats, compact = false }: StatsDisplayPro
         })}
       </div>
 
+      {/* Gráfico tempo médio por operação */}
+      {stats.avgTimeByOperation && stats.avgTimeByOperation.length > 0 && (
+        <div className="mt-6">
+          <h3 className="font-display text-lg font-bold text-gray-700 mb-3">
+            Tempo Médio por Operação
+          </h3>
+          <TimeByOperationChart data={stats.avgTimeByOperation} />
+        </div>
+      )}
+
       {/* Sessões recentes */}
       {stats.recentSessions && stats.recentSessions.length > 0 && (
         <div className="mt-6">
           <SessionList sessions={stats.recentSessions} compact={compact} />
+        </div>
+      )}
+
+      {/* Melhores sessões */}
+      {stats.bestSessions && stats.bestSessions.length > 0 && (
+        <div className="mt-6">
+          <BestSessions sessions={stats.bestSessions} />
         </div>
       )}
     </div>

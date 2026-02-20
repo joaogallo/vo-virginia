@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useGameStore } from "@/stores/game-store"
 import { useKeyboardInput } from "@/hooks/useKeyboardInput"
 import { useSound } from "@/hooks/useSound"
+import { useSessionPersistence } from "@/hooks/useSessionPersistence"
 import OperationCard from "./OperationCard"
 import VirtualKeypad from "./VirtualKeypad"
 import GameTimer from "./GameTimer"
@@ -32,6 +33,7 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
   const [showConfetti, setShowConfetti] = useState(false)
   const feedbackStartRef = useRef<number>(0)
   const { playCorrect, playIncorrect, isMuted, toggleMute } = useSound()
+  const { isSyncing } = useSessionPersistence()
 
   const total = gameState?.sessionTotal ?? 0
   const answered = gameState?.correctCount ?? 0
@@ -98,6 +100,9 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
           resetKey={gameState.currentQuestion?.id ?? ""}
         />
         <div className="flex items-center gap-3">
+          {isSyncing && (
+            <span className="text-xs text-gray-400 animate-pulse">Salvando...</span>
+          )}
           <GameProgress answered={answered} total={total} />
           <button
             onClick={toggleMute}

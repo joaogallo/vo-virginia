@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import StatsDisplay, { type Stats } from "@/components/stats/StatsDisplay"
+import type { Period } from "@/components/stats/PeriodFilter"
 
 export default function ChildDetailPage() {
   const params = useParams()
@@ -12,10 +13,15 @@ export default function ChildDetailPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [childName, setChildName] = useState("")
   const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState<Period>("all")
+
+  const fetchStats = useCallback((p: Period) => {
+    return fetch(`/api/estatisticas/${childId}?period=${p}`).then((r) => r.json())
+  }, [childId])
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/estatisticas/${childId}`).then((r) => r.json()),
+      fetchStats(period),
       fetch("/api/filhos").then((r) => r.json()),
     ]).then(([statsData, filhosData]) => {
       setStats(statsData)
@@ -23,7 +29,12 @@ export default function ChildDetailPage() {
       if (child) setChildName(child.name)
       setLoading(false)
     })
-  }, [childId])
+  }, [childId, fetchStats, period])
+
+  const handlePeriodChange = (p: Period) => {
+    setPeriod(p)
+    setStats(null)
+  }
 
   if (loading) {
     return (
@@ -47,7 +58,11 @@ export default function ChildDetailPage() {
           </h1>
         </div>
 
-        <StatsDisplay stats={stats} />
+        <StatsDisplay
+          stats={stats}
+          period={period}
+          onPeriodChange={handlePeriodChange}
+        />
       </motion.div>
     </div>
   )

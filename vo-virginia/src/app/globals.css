@@ -21,3 +21,27 @@ body {
   min-height: 100vh;
   font-family: var(--font-sans);
 }
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  nav,
+  header,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl,
+  .shadow-md {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb;
+  }
+
+  .recharts-responsive-container {
+    page-break-inside: avoid;
+  }
+}
