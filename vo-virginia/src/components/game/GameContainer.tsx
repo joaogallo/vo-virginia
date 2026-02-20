@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useGameStore } from "@/stores/game-store"
 import { useKeyboardInput } from "@/hooks/useKeyboardInput"
 import OperationCard from "./OperationCard"
@@ -29,20 +29,25 @@ export default function GameContainer({ onSessionComplete }: GameContainerProps)
   } = useGameStore()
 
   const [showConfetti, setShowConfetti] = useState(false)
+  const feedbackStartRef = useRef<number>(0)
 
   const total = gameState?.sessionTotal ?? 0
   const answered = gameState?.correctCount ?? 0
 
   const handleConfirm = useCallback(() => {
     if (showingFeedback) {
-      // Avançar após feedback
+      // Ignorar se o feedback começou há menos de 600ms (evita skip acidental)
+      if (Date.now() - feedbackStartRef.current < 600) return
       advanceToNext()
       return
     }
     const result = confirmAnswer()
-    if (result?.wasCorrect) {
-      setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 2500)
+    if (result) {
+      feedbackStartRef.current = Date.now()
+      if (result.wasCorrect) {
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 2500)
+      }
     }
   }, [showingFeedback, confirmAnswer, advanceToNext])
 

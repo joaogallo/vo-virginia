@@ -21,6 +21,7 @@ export function useKeyboardInput({
     if (!enabled) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return
       if (e.key >= "0" && e.key <= "9") {
         e.preventDefault()
         onDigit(e.key)
