@@ -11,6 +11,7 @@ enum UserRole {
   CHILD
   PARENT
   TEACHER
+  ADMIN
 }
 
 enum MedalLevel {

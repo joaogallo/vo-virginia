@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 export default function NavLinks() {
   const { data: session } = useSession()
   const isAdult = session?.user?.role === "PARENT" || session?.user?.role === "TEACHER"
+  const isAdmin = session?.user?.role === "ADMIN"
 
   return (
     <nav className="flex items-center gap-4">
@@ -26,6 +27,11 @@ export default function NavLinks() {
       <Link href="/perfil" className="text-sm font-semibold text-gray-600 hover:text-gray-800">
         Perfil
       </Link>
+      {isAdmin && (
+        <Link href="/admin" className="text-sm font-semibold text-red-500 hover:text-red-700">
+          Admin
+        </Link>
+      )}
     </nav>
   )
 }
