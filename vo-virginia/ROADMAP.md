@@ -77,13 +77,13 @@
 - [x] CI/CD com GitHub Actions (lint + test + build)
 - [x] Coverage mínimo de 80% no game-engine
 
-## v0.8.0 — Modo Desafio
+## v0.8.0 — Modo Desafio (Concluído)
 
-- [ ] Modo contra o tempo total (resolver X questões em Y segundos)
-- [ ] Modo contra o tempo por questão (resolver X questões com no máximo Y segundos cada; se estourar o tempo de uma questão interrompe o fluxo e grava a meta, o tempo por questão, a quantidade de questões respondidas e a taxa de acerto)
-- [ ] Modo maratona (questões infinitas, ver até onde vai)
-- [ ] Modo revisão (foco em questões que mais errou)
-- [ ] Histórico de modos completados
+- [x] Modo contra o tempo total (resolver X questões em Y segundos)
+- [x] Modo contra o tempo por questão (resolver X questões com no máximo Y segundos cada; se estourar o tempo de uma questão interrompe o fluxo e grava a meta, o tempo por questão, a quantidade de questões respondidas e a taxa de acerto)
+- [x] Modo maratona (questões infinitas, ver até onde vai)
+- [x] Modo revisão (foco em questões que mais errou)
+- [x] Histórico de modos completados
 
 ## v0.9.0 — Social e Multiplayer
 

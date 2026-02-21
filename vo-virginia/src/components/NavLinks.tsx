@@ -10,6 +10,9 @@ export default function NavLinks() {
 
   return (
     <nav aria-label="Menu principal" className="flex items-center gap-4">
+      <Link href="/desafios" className="text-sm font-semibold text-gray-600 hover:text-gray-800">
+        Desafios
+      </Link>
       <Link href="/medalhas" className="text-sm font-semibold text-gray-600 hover:text-gray-800">
         Medalhas
       </Link>

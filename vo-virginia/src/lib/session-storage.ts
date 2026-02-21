@@ -1,7 +1,7 @@
-import type { Operation, Question, AnswerRecord } from "@/types/game"
+import type { Operation, Question, SessionMode, AnswerRecord } from "@/types/game"
 
 const SESSION_KEY = "vo-virginia-session"
-const VERSION = "1"
+const VERSION = "2"
 const MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24h
 
 export interface PersistedSession {
@@ -25,6 +25,14 @@ export interface PersistedSession {
   sessionTotal: number
   sessionStartTime: number
   questionStartTime: number
+
+  // Challenge mode
+  challengeMode: SessionMode | null
+  mode: SessionMode | null
+  timeLimitSeconds: number | null
+  timeLimitPerQuestionSeconds: number | null
+  isInterrupted: boolean
+  interruptedReason: string | null
 
   // Histórico
   answerHistory: AnswerRecord[]

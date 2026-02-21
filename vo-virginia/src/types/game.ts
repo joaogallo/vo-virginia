@@ -1,5 +1,7 @@
 export type Operation = "addition" | "subtraction" | "multiplication" | "division"
 
+export type SessionMode = "practice" | "timed_total" | "timed_per_question" | "marathon" | "review"
+
 export interface Question {
   id: string
   operation: Operation
@@ -22,6 +24,10 @@ export interface GameState {
   questionStartTime: number
   isComplete: boolean
   sessionTotal: number
+  mode: SessionMode
+  timeLimitSeconds: number | null
+  timeLimitPerQuestionSeconds: number | null
+  marathonBatchSize: number
 }
 
 export interface AnswerRecord {
@@ -60,4 +66,20 @@ export const OPERATION_COLORS: Record<Operation, string> = {
   subtraction: "bg-blue-500",
   multiplication: "bg-orange-500",
   division: "bg-purple-500",
+}
+
+export const SESSION_MODE_LABELS: Record<SessionMode, string> = {
+  practice: "Prática",
+  timed_total: "Contra o Tempo (Total)",
+  timed_per_question: "Contra o Tempo (Por Questão)",
+  marathon: "Maratona",
+  review: "Revisão",
+}
+
+export const SESSION_MODE_ICONS: Record<SessionMode, string> = {
+  practice: "📝",
+  timed_total: "⏱️",
+  timed_per_question: "⏰",
+  marathon: "🏃",
+  review: "🔄",
 }

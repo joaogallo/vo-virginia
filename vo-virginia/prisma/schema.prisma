@@ -27,6 +27,14 @@ enum OperationType {
   DIVISION
 }
 
+enum SessionMode {
+  PRACTICE
+  TIMED_TOTAL
+  TIMED_PER_QUESTION
+  MARATHON
+  REVIEW
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -143,6 +151,11 @@ model GameSession {
   startedAt      DateTime        @default(now())
   endedAt        DateTime?
   completed      Boolean         @default(false)
+  mode                        SessionMode @default(PRACTICE)
+  timeLimitSeconds            Int?
+  timeLimitPerQuestionSeconds Int?
+  interruptedAt               DateTime?
+  interruptedReason           String?
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   answers Answer[]

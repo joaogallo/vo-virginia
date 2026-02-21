@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { operations, numbers, totalQuestions: clientTotal } = parsed.data
+  const { operations, numbers, totalQuestions: clientTotal, mode, timeLimitSeconds, timeLimitPerQuestionSeconds } = parsed.data
 
   // Usar total do cliente se fornecido, senão calcular
   let totalQuestions = clientTotal ?? 0
@@ -36,6 +36,9 @@ export async function POST(req: NextRequest) {
       operations,
       numbers,
       totalQuestions,
+      mode,
+      timeLimitSeconds,
+      timeLimitPerQuestionSeconds,
     },
   })
 

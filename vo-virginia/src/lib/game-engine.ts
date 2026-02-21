@@ -1,4 +1,4 @@
-import type { Question, GameState, Operation } from "@/types/game"
+import type { Question, GameState, Operation, SessionMode } from "@/types/game"
 
 let questionIdCounter = 0
 
@@ -50,7 +50,7 @@ export function generateQuestions(
  * - Subtração: (x+y) - x = ? (resposta é y, evita negativos)
  * - Divisão: (x*y) / x = ? (resposta é y, evita decimais)
  */
-function buildQuestion(op: Operation, x: number, y: number): Question {
+export function buildQuestion(op: Operation, x: number, y: number): Question {
   const id = generateId()
 
   switch (op) {
@@ -110,7 +110,10 @@ export function createGameState(
   operations: Operation[],
   numbers: number[],
   maxRetries: number,
-  maxQuestions?: number
+  maxQuestions?: number,
+  mode: SessionMode = "practice",
+  timeLimitSeconds?: number | null,
+  timeLimitPerQuestionSeconds?: number | null,
 ): GameState {
   let queue = generateQuestions(operations, numbers)
   if (maxQuestions && maxQuestions < queue.length) {
@@ -126,7 +129,56 @@ export function createGameState(
     sessionStartTime: Date.now(),
     questionStartTime: Date.now(),
     isComplete: false,
-    sessionTotal: queue.length,
+    sessionTotal: mode === "marathon" ? 0 : queue.length,
+    mode,
+    timeLimitSeconds: timeLimitSeconds ?? null,
+    timeLimitPerQuestionSeconds: timeLimitPerQuestionSeconds ?? null,
+    marathonBatchSize: 20,
+  }
+}
+
+/**
+ * Gera um batch de questões adicionais para o modo maratona.
+ */
+export function replenishMarathonQueue(
+  state: GameState,
+  operations: Operation[],
+  numbers: number[],
+): GameState {
+  const newBatch = generateQuestions(operations, numbers).slice(0, state.marathonBatchSize)
+  return {
+    ...state,
+    queue: [...state.queue, ...newBatch],
+  }
+}
+
+/**
+ * Cria estado de jogo para o modo revisão com questões pré-construídas.
+ */
+export function createReviewGameState(
+  questions: Question[],
+  maxRetries: number,
+): GameState {
+  const shuffled = [...questions]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return {
+    queue: shuffled,
+    currentQuestion: null,
+    correctCount: 0,
+    wrongCount: 0,
+    currentAttempt: 1,
+    maxRetries,
+    sessionStartTime: Date.now(),
+    questionStartTime: Date.now(),
+    isComplete: false,
+    sessionTotal: shuffled.length,
+    mode: "review",
+    timeLimitSeconds: null,
+    timeLimitPerQuestionSeconds: null,
+    marathonBatchSize: 0,
   }
 }
 

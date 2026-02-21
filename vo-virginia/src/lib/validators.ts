@@ -3,13 +3,18 @@ import { z } from "zod"
 export const createSessionSchema = z.object({
   operations: z.array(z.enum(["ADDITION", "SUBTRACTION", "MULTIPLICATION", "DIVISION"])).min(1),
   numbers: z.array(z.number().int()).min(1),
-  totalQuestions: z.number().int().min(1).optional(),
+  totalQuestions: z.number().int().min(0).optional(),
+  mode: z.enum(["PRACTICE", "TIMED_TOTAL", "TIMED_PER_QUESTION", "MARATHON", "REVIEW"]).optional().default("PRACTICE"),
+  timeLimitSeconds: z.number().int().min(1).optional(),
+  timeLimitPerQuestionSeconds: z.number().int().min(1).optional(),
 })
 
 export const endSessionSchema = z.object({
   completed: z.boolean(),
   correctAnswers: z.number().int().min(0),
   wrongAnswers: z.number().int().min(0),
+  interruptedReason: z.string().optional(),
+  totalQuestions: z.number().int().min(0).optional(),
 })
 
 export const submitAnswersSchema = z.object({

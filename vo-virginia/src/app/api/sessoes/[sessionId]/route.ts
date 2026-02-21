@@ -42,12 +42,22 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
+  const { interruptedReason, totalQuestions, ...rest } = parsed.data
+  const updateData: Record<string, unknown> = {
+    ...rest,
+    endedAt: new Date(),
+  }
+  if (interruptedReason) {
+    updateData.interruptedAt = new Date()
+    updateData.interruptedReason = interruptedReason
+  }
+  if (totalQuestions !== undefined) {
+    updateData.totalQuestions = totalQuestions
+  }
+
   const gameSession = await prisma.gameSession.updateMany({
     where: { id: sessionId, userId: session.user.id },
-    data: {
-      ...parsed.data,
-      endedAt: new Date(),
-    },
+    data: updateData,
   })
 
   if (gameSession.count === 0) {

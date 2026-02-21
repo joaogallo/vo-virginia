@@ -18,7 +18,7 @@ function buildSnapshot(): PersistedSession | null {
   if (!s.gameState) return null
 
   return {
-    version: "1",
+    version: "2",
     savedAt: new Date().toISOString(),
     backendSessionId: s.backendSessionId,
     syncedAnswerCount: s.syncedAnswerCount,
@@ -34,6 +34,12 @@ function buildSnapshot(): PersistedSession | null {
     sessionTotal: s.gameState.sessionTotal,
     sessionStartTime: s.gameState.sessionStartTime,
     questionStartTime: s.gameState.questionStartTime,
+    challengeMode: s.challengeMode,
+    mode: s.gameState.mode,
+    timeLimitSeconds: s.timeLimitSeconds,
+    timeLimitPerQuestionSeconds: s.timeLimitPerQuestionSeconds,
+    isInterrupted: s.isInterrupted,
+    interruptedReason: s.interruptedReason,
     answerHistory: s.answerHistory,
   }
 }

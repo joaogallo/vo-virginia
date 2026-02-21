@@ -1,13 +1,17 @@
 import { create } from "zustand"
 import type {
   Operation,
+  Question,
   GameState,
+  SessionMode,
   AnswerRecord,
   FeedbackType,
   AvatarState,
 } from "@/types/game"
 import {
   createGameState,
+  createReviewGameState,
+  replenishMarathonQueue,
   nextQuestion,
   submitAnswer,
 } from "@/lib/game-engine"
@@ -29,6 +33,13 @@ interface GameStore {
   lastCorrectAnswer: number | null
   needsAdvance: boolean
 
+  // Challenge mode
+  challengeMode: SessionMode
+  timeLimitSeconds: number | null
+  timeLimitPerQuestionSeconds: number | null
+  isInterrupted: boolean
+  interruptedReason: string | null
+
   // Persistence
   backendSessionId: string | null
   syncedAnswerCount: number
@@ -47,6 +58,14 @@ interface GameStore {
   confirmAnswer: () => { wasCorrect: boolean; correctAnswer: number; exhaustedRetries: boolean } | null
   advanceToNext: () => void
   endSession: () => void
+
+  // Challenge actions
+  setChallengeMode: (mode: SessionMode) => void
+  setTimeLimits: (total: number | null, perQuestion: number | null) => void
+  startChallengeSession: (maxRetries: number, reviewQuestions?: Question[]) => void
+  interruptSession: (reason: string) => void
+  endMarathon: () => void
+  resetChallengeSetup: () => void
 
   // Persistence actions
   setBackendSessionId: (id: string) => void
@@ -73,6 +92,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   avatarState: "idle",
   lastCorrectAnswer: null,
   needsAdvance: false,
+
+  // Challenge mode
+  challengeMode: "practice",
+  timeLimitSeconds: null,
+  timeLimitPerQuestionSeconds: null,
+  isInterrupted: false,
+  interruptedReason: null,
 
   // Persistence
   backendSessionId: null,
@@ -114,6 +140,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       needsAdvance: false,
       backendSessionId: null,
       syncedAnswerCount: 0,
+      challengeMode: "practice",
+      timeLimitSeconds: null,
+      timeLimitPerQuestionSeconds: null,
+      isInterrupted: false,
+      interruptedReason: null,
     }),
 
   // Game actions
@@ -132,6 +163,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       needsAdvance: false,
       backendSessionId: null,
       syncedAnswerCount: 0,
+      challengeMode: "practice",
+      isInterrupted: false,
+      interruptedReason: null,
     })
   },
 
@@ -209,13 +243,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   advanceToNext: () => {
-    const { gameState, needsAdvance } = get()
+    const { gameState, needsAdvance, selectedOperations, selectedNumbers } = get()
     if (!gameState) return
 
     if (needsAdvance) {
       // Acertou ou esgotou tentativas: avançar para próxima questão
       const stateForNext = { ...gameState, currentQuestion: null }
-      const newState = nextQuestion(stateForNext)
+      let newState = nextQuestion(stateForNext)
+
+      // Marathon: replenish queue when it's empty instead of completing
+      if (newState.isComplete && gameState.mode === "marathon") {
+        const replenished = replenishMarathonQueue(stateForNext, selectedOperations, selectedNumbers)
+        newState = nextQuestion(replenished)
+      }
+
       set({
         gameState: newState,
         needsAdvance: false,
@@ -238,6 +279,99 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  // Challenge actions
+  setChallengeMode: (mode) => set({ challengeMode: mode }),
+
+  setTimeLimits: (total, perQuestion) =>
+    set({ timeLimitSeconds: total, timeLimitPerQuestionSeconds: perQuestion }),
+
+  startChallengeSession: (maxRetries, reviewQuestions?) => {
+    const { selectedOperations, selectedNumbers, questionLimit, challengeMode, timeLimitSeconds, timeLimitPerQuestionSeconds } = get()
+
+    let state: GameState
+
+    if (challengeMode === "review" && reviewQuestions && reviewQuestions.length > 0) {
+      state = createReviewGameState(reviewQuestions, maxRetries)
+    } else {
+      state = createGameState(
+        selectedOperations,
+        selectedNumbers,
+        maxRetries,
+        challengeMode === "marathon" ? undefined : (questionLimit ?? undefined),
+        challengeMode,
+        timeLimitSeconds,
+        timeLimitPerQuestionSeconds,
+      )
+    }
+
+    const withQuestion = nextQuestion(state)
+    set({
+      gameState: withQuestion,
+      answerHistory: [],
+      inputValue: "",
+      showingFeedback: false,
+      feedbackType: null,
+      avatarState: "idle",
+      lastCorrectAnswer: null,
+      needsAdvance: false,
+      backendSessionId: null,
+      syncedAnswerCount: 0,
+      isInterrupted: false,
+      interruptedReason: null,
+    })
+  },
+
+  interruptSession: (reason) => {
+    const { gameState } = get()
+    if (!gameState) return
+    set({
+      gameState: { ...gameState, isComplete: true },
+      isInterrupted: true,
+      interruptedReason: reason,
+      showingFeedback: false,
+      feedbackType: null,
+    })
+  },
+
+  endMarathon: () => {
+    const { gameState, answerHistory } = get()
+    if (!gameState) return
+    const totalAnswered = new Set(
+      answerHistory.filter((a) => a.isCorrect).map((a) => a.questionId)
+    ).size + gameState.wrongCount
+    set({
+      gameState: {
+        ...gameState,
+        isComplete: true,
+        sessionTotal: totalAnswered,
+      },
+      showingFeedback: false,
+      feedbackType: null,
+    })
+  },
+
+  resetChallengeSetup: () =>
+    set({
+      selectedOperations: [],
+      selectedNumbers: [],
+      questionLimit: null,
+      gameState: null,
+      answerHistory: [],
+      inputValue: "",
+      showingFeedback: false,
+      feedbackType: null,
+      avatarState: "idle",
+      lastCorrectAnswer: null,
+      needsAdvance: false,
+      backendSessionId: null,
+      syncedAnswerCount: 0,
+      challengeMode: "practice",
+      timeLimitSeconds: null,
+      timeLimitPerQuestionSeconds: null,
+      isInterrupted: false,
+      interruptedReason: null,
+    }),
+
   // Persistence actions
   setBackendSessionId: (id) => set({ backendSessionId: id }),
   setSyncedAnswerCount: (count) => set({ syncedAnswerCount: count }),
@@ -250,6 +384,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       backendSessionId: persisted.backendSessionId,
       syncedAnswerCount: persisted.syncedAnswerCount,
       answerHistory: persisted.answerHistory,
+      challengeMode: persisted.challengeMode ?? "practice",
+      timeLimitSeconds: persisted.timeLimitSeconds ?? null,
+      timeLimitPerQuestionSeconds: persisted.timeLimitPerQuestionSeconds ?? null,
+      isInterrupted: persisted.isInterrupted ?? false,
+      interruptedReason: persisted.interruptedReason ?? null,
       gameState: {
         queue: persisted.queue,
         currentQuestion: persisted.currentQuestion,
@@ -261,6 +400,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         questionStartTime: Date.now(),
         isComplete: false,
         sessionTotal: persisted.sessionTotal,
+        mode: persisted.mode ?? "practice",
+        timeLimitSeconds: persisted.timeLimitSeconds ?? null,
+        timeLimitPerQuestionSeconds: persisted.timeLimitPerQuestionSeconds ?? null,
+        marathonBatchSize: persisted.mode === "marathon" ? 20 : 0,
       },
       inputValue: "",
       showingFeedback: false,
