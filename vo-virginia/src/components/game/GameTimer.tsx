@@ -18,7 +18,11 @@ export default function GameTimer({ isRunning, resetKey }: GameTimerProps) {
         : "text-red-600"
 
   return (
-    <div className={`font-display text-2xl sm:text-3xl font-bold ${color} transition-colors duration-500`}>
+    <div
+      className={`font-display text-2xl sm:text-3xl font-bold ${color} transition-colors duration-500`}
+      aria-label={`Tempo: ${elapsed} segundos`}
+      aria-live="off"
+    >
       <span className="tabular-nums">{elapsed}</span>
       <span className="text-lg sm:text-xl ml-1">s</span>
     </div>

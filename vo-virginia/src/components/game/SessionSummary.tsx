@@ -32,10 +32,10 @@ export default function SessionSummary({ onPlayAgain, onGoHome }: SessionSummary
   const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0
 
   const stats = [
-    { label: "Acertos", value: correctAnswers, color: "text-green-600", icon: "✅" },
-    { label: "Erros", value: wrongAnswers, color: "text-red-500", icon: "❌" },
-    { label: "Tempo", value: `${minutes}m ${seconds}s`, color: "text-blue-600", icon: "⏱️" },
-    { label: "Precisão", value: `${accuracy}%`, color: "text-purple-600", icon: "🎯" },
+    { label: "Acertos", value: correctAnswers, color: "text-green-600", icon: "✅", iconLabel: "Acertos" },
+    { label: "Erros", value: wrongAnswers, color: "text-red-500", icon: "❌", iconLabel: "Erros" },
+    { label: "Tempo", value: `${minutes}m ${seconds}s`, color: "text-blue-600", icon: "⏱️", iconLabel: "Tempo" },
+    { label: "Precisão", value: `${accuracy}%`, color: "text-purple-600", icon: "🎯", iconLabel: "Precisão" },
   ]
 
   return (
@@ -83,7 +83,7 @@ export default function SessionSummary({ onPlayAgain, onGoHome }: SessionSummary
             transition={{ delay: 0.6 + index * 0.1 }}
             className="bg-white rounded-2xl p-4 shadow-lg flex flex-col items-center gap-1"
           >
-            <span className="text-2xl">{stat.icon}</span>
+            <span className="text-2xl" role="img" aria-hidden="true">{stat.icon}</span>
             <span className={`font-display text-2xl font-bold ${stat.color}`}>
               {stat.value}
             </span>

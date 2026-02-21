@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   MEDAL_DEFINITIONS,
@@ -40,6 +40,18 @@ function MedalDetailSheet({
     ? earnedLevels.size > 0
     : earnedLevels.has("SINGLE")
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    },
+    [onClose]
+  )
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [handleKeyDown])
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -53,13 +65,16 @@ function MedalDetailSheet({
         animate={{ y: 0 }}
         exit={{ y: 100 }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-labelledby="medal-detail-title"
+        aria-modal="true"
         className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
       >
         <div className="flex flex-col items-center gap-3 mb-4">
           <span className={`text-5xl ${!isEarned ? "grayscale opacity-40" : ""}`}>
             {medal.icon}
           </span>
-          <h2 className="font-display text-2xl font-bold text-gray-800">
+          <h2 id="medal-detail-title" className="font-display text-2xl font-bold text-gray-800">
             {medal.name}
           </h2>
           <p className="text-gray-500 text-center">{medal.description}</p>
@@ -109,6 +124,7 @@ function MedalDetailSheet({
 
         <button
           onClick={onClose}
+          aria-label="Fechar"
           className="w-full mt-4 py-3 bg-gray-100 rounded-2xl font-display font-bold text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors"
         >
           Fechar

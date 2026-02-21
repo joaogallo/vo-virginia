@@ -38,7 +38,7 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
       </p>
 
       {/* Operações */}
-      <div className="w-full">
+      <div className="w-full" role="group" aria-label="Selecionar operações">
         <h2 className="font-display text-lg font-bold text-gray-700 mb-2">
           Operações
         </h2>
@@ -50,6 +50,7 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
                 key={op.value}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => toggleOperation(op.value)}
+                aria-pressed={isSelected}
                 className={`
                   rounded-2xl border-3 p-3 flex flex-col items-center gap-0.5
                   font-display text-lg font-bold transition-all duration-200
@@ -70,7 +71,7 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
       </div>
 
       {/* Números */}
-      <div className="w-full">
+      <div className="w-full" role="group" aria-label="Selecionar números">
         <h2 className="font-display text-lg font-bold text-gray-700 mb-2">
           Números
         </h2>
@@ -82,6 +83,8 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
                 key={num}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => toggleNumber(num)}
+                aria-pressed={isSelected}
+                aria-label={`Número ${num}`}
                 className={`
                   rounded-xl w-12 h-12 flex items-center justify-center
                   font-display text-lg font-bold transition-all duration-200
@@ -120,6 +123,8 @@ export default function SessionSetup({ onStart }: SessionSetupProps) {
                 const val = parseInt(e.target.value, 10)
                 setQuestionLimit(val === total ? null : val)
               }}
+              aria-label="Quantidade de questões"
+              aria-valuetext={`${effectiveLimit} de ${total} questões`}
               className="flex-1 accent-green-500"
             />
             <span className="font-display text-xl font-bold text-gray-700 min-w-[3ch] text-right">

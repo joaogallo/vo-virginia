@@ -23,12 +23,15 @@ export default function SessionRecoveryDialog({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      role="dialog"
+      aria-labelledby="recovery-title"
+      aria-describedby="recovery-description"
       className="flex flex-col items-center gap-5 w-full max-w-lg mx-auto px-4"
     >
-      <h2 className="font-display text-2xl font-bold text-gray-800 text-center">
+      <h2 id="recovery-title" className="font-display text-2xl font-bold text-gray-800 text-center">
         Sessão em andamento
       </h2>
-      <p className="text-gray-600 text-center">
+      <p id="recovery-description" className="text-gray-600 text-center">
         Você tem uma sessão interrompida. Deseja continuar de onde parou?
       </p>
 

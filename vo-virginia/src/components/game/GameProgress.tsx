@@ -18,7 +18,14 @@ export default function GameProgress({ answered, total }: GameProgressProps) {
           {answered} de {total}
         </span>
       </div>
-      <div className="h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+      <div
+        className="h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner"
+        role="progressbar"
+        aria-valuenow={answered}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-label={`Progresso: ${answered} de ${total} questões`}
+      >
         <motion.div
           className="h-full bg-gradient-to-r from-yellow-400 via-green-400 to-green-500 rounded-full"
           initial={{ width: 0 }}

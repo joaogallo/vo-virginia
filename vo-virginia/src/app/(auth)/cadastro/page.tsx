@@ -64,12 +64,13 @@ export default function CadastroPage() {
         {/* Seleção de perfil */}
         <div>
           <label className="text-sm font-semibold text-gray-600 mb-2 block">Eu sou:</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Selecione seu perfil">
             {roles.map((r) => (
               <button
                 key={r.value}
                 type="button"
                 onClick={() => setRole(r.value)}
+                aria-pressed={role === r.value}
                 className={`
                   rounded-xl p-3 flex flex-col items-center gap-1 border-2 transition-all cursor-pointer
                   ${role === r.value
@@ -78,52 +79,71 @@ export default function CadastroPage() {
                   }
                 `}
               >
-                <span className="text-2xl">{r.icon}</span>
+                <span className="text-2xl" role="img" aria-hidden="true">{r.icon}</span>
                 <span className="text-xs font-semibold text-gray-700">{r.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <input
-          type="text"
-          placeholder="Nome"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
-        />
-        <input
-          type="password"
-          placeholder="Senha (mínimo 6 caracteres)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
-        />
+        <div>
+          <label htmlFor="cadastro-name" className="sr-only">Nome</label>
+          <input
+            id="cadastro-name"
+            type="text"
+            placeholder="Nome"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoComplete="name"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label htmlFor="cadastro-email" className="sr-only">Email</label>
+          <input
+            id="cadastro-email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label htmlFor="cadastro-password" className="sr-only">Senha</label>
+          <input
+            id="cadastro-password"
+            type="password"
+            placeholder="Senha (mínimo 6 caracteres)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            autoComplete="new-password"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
+          />
+        </div>
 
         {/* Código de vinculação (apenas para crianças) */}
         {role === "CHILD" && (
-          <input
-            type="text"
-            placeholder="Código do responsável (opcional)"
-            value={linkCode}
-            onChange={(e) => setLinkCode(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
-          />
+          <div>
+            <label htmlFor="cadastro-linkcode" className="sr-only">Código do responsável</label>
+            <input
+              id="cadastro-linkcode"
+              type="text"
+              placeholder="Código do responsável (opcional)"
+              value={linkCode}
+              onChange={(e) => setLinkCode(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
+            />
+          </div>
         )}
 
         {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
+          <p role="alert" className="text-red-500 text-sm text-center">{error}</p>
         )}
 
         <button

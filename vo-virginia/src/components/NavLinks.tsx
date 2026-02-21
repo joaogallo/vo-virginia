@@ -9,7 +9,7 @@ export default function NavLinks() {
   const isAdmin = session?.user?.role === "ADMIN"
 
   return (
-    <nav className="flex items-center gap-4">
+    <nav aria-label="Menu principal" className="flex items-center gap-4">
       <Link href="/medalhas" className="text-sm font-semibold text-gray-600 hover:text-gray-800">
         Medalhas
       </Link>

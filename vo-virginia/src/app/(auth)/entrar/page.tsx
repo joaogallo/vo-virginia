@@ -39,25 +39,35 @@ export default function EntrarPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
-        />
+        <div>
+          <label htmlFor="login-email" className="sr-only">Email</label>
+          <input
+            id="login-email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label htmlFor="login-password" className="sr-only">Senha</label>
+          <input
+            id="login-password"
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-lg focus:border-green-400 focus:outline-none transition-colors"
+          />
+        </div>
 
         {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
+          <p role="alert" className="text-red-500 text-sm text-center">{error}</p>
         )}
 
         <button
@@ -78,6 +88,7 @@ export default function EntrarPage() {
       <div className="flex flex-col gap-3">
         <button
           onClick={() => signIn("google", { callbackUrl: "/jogar" })}
+          aria-label="Entrar com Google"
           className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -90,6 +101,7 @@ export default function EntrarPage() {
         </button>
         <button
           onClick={() => signIn("microsoft-entra-id", { callbackUrl: "/jogar" })}
+          aria-label="Entrar com Microsoft"
           className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">

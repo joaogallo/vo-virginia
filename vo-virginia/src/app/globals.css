@@ -22,6 +22,85 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Acessibilidade: screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Acessibilidade: focus-visible global */
+*:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Acessibilidade: skip link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: #1f2937;
+  color: white;
+  font-weight: 700;
+  border-radius: 0 0 0.75rem 0.75rem;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Acessibilidade: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Acessibilidade: alto contraste */
+@media (prefers-contrast: more) {
+  body {
+    background: white !important;
+  }
+
+  .bg-white,
+  [class*="bg-white"] {
+    border: 2px solid #1f2937 !important;
+  }
+
+  .text-gray-400,
+  .text-gray-500 {
+    color: #374151 !important;
+  }
+
+  .border-gray-200 {
+    border-color: #6b7280 !important;
+  }
+
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl,
+  .shadow-md {
+    box-shadow: 0 0 0 2px #1f2937 !important;
+  }
+}
+
 @media print {
   body {
     background: white !important;

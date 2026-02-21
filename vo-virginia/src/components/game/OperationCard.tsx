@@ -19,6 +19,13 @@ const operationColors: Record<string, { border: string; bg: string; text: string
   "÷": { border: "border-purple-400", bg: "bg-purple-50", text: "text-purple-600" },
 }
 
+const operationNames: Record<string, string> = {
+  "+": "mais",
+  "−": "menos",
+  "×": "vezes",
+  "÷": "dividido por",
+}
+
 export default function OperationCard({
   question,
   inputValue,
@@ -61,6 +68,13 @@ export default function OperationCard({
           ${showingFeedback && feedbackType === "incorrect" ? "ring-4 ring-red-400 ring-opacity-60" : ""}
         `}
       >
+        {/* Descrição para screen readers */}
+        <span className="sr-only" aria-live="polite">
+          Quanto é {question.displayFirst} {operationNames[question.operationSymbol] || question.operationSymbol} {question.displaySecond}?
+          {showingFeedback && feedbackType === "correct" && ` Correto! A resposta é ${question.correctAnswer}.`}
+          {showingFeedback && feedbackType === "incorrect" && ` Incorreto. Tente novamente.`}
+        </span>
+
         {/* Tentativas restantes */}
         {currentAttempt > 1 && !showingFeedback && (
           <div className="absolute top-3 right-4 text-sm font-semibold text-gray-400">

@@ -16,12 +16,14 @@ function KeypadButton({
   variant = "default",
   className = "",
   disabled = false,
+  ariaLabel,
 }: {
   label: string
   onClick: () => void
   variant?: "default" | "action" | "confirm" | "danger"
   className?: string
   disabled?: boolean
+  ariaLabel?: string
 }) {
   const variants = {
     default: "bg-white hover:bg-gray-50 text-gray-800 border-gray-200 shadow-md",
@@ -35,6 +37,7 @@ function KeypadButton({
       whileTap={{ scale: 0.92 }}
       whileHover={{ scale: 1.05 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      aria-label={ariaLabel}
       onClick={() => {
         if (!disabled) {
           // Haptic feedback on mobile
@@ -80,6 +83,7 @@ export default function VirtualKeypad({
         onClick={onBackspace}
         variant="action"
         disabled={disabled}
+        ariaLabel="Apagar"
       />
 
       {/* Linha 2: 4 5 6 (vazio) */}
@@ -98,6 +102,7 @@ export default function VirtualKeypad({
         variant="confirm"
         className="row-span-2"
         disabled={disabled}
+        ariaLabel="Confirmar resposta"
       />
 
       {/* Linha 4: C 0 */}
@@ -106,6 +111,7 @@ export default function VirtualKeypad({
         onClick={onClear}
         variant="danger"
         disabled={disabled}
+        ariaLabel="Limpar"
       />
       <KeypadButton
         label="0"

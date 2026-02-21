@@ -69,12 +69,13 @@ export default function FeedbackPage() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Tipo de feedback
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Tipo de feedback">
               {feedbackTypes.map((ft) => (
                 <button
                   key={ft.value}
                   type="button"
                   onClick={() => setType(ft.value)}
+                  aria-pressed={type === ft.value}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
                     type === ft.value
                       ? "bg-green-500 text-white shadow-md"
@@ -108,7 +109,7 @@ export default function FeedbackPage() {
 
           {/* Erro */}
           {error && (
-            <p className="text-red-500 text-sm font-semibold">{error}</p>
+            <p role="alert" className="text-red-500 text-sm font-semibold">{error}</p>
           )}
 
           {/* Sucesso */}
@@ -118,6 +119,7 @@ export default function FeedbackPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
+                role="status"
                 className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-semibold"
               >
                 Feedback enviado com sucesso! Obrigado pela sua contribuição.

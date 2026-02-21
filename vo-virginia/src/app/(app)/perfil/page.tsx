@@ -122,15 +122,17 @@ export default function PerfilPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setMaxRetries(Math.max(1, maxRetries - 1))}
+                aria-label="Diminuir tentativas"
                 className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 -
               </button>
-              <span className="font-display text-2xl font-bold text-gray-800 w-10 text-center">
+              <span className="font-display text-2xl font-bold text-gray-800 w-10 text-center" aria-live="polite" aria-label={`${maxRetries} tentativas`}>
                 {maxRetries}
               </span>
               <button
                 onClick={() => setMaxRetries(Math.min(20, maxRetries + 1))}
+                aria-label="Aumentar tentativas"
                 className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 +
@@ -156,11 +158,12 @@ export default function PerfilPage() {
                     setDefaultQuestionLimit(defaultQuestionLimit - 5)
                   }
                 }}
+                aria-label="Diminuir questões por sessão"
                 className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 -
               </button>
-              <span className="font-display text-lg font-bold text-gray-800 min-w-[4ch] text-center">
+              <span className="font-display text-lg font-bold text-gray-800 min-w-[4ch] text-center" aria-live="polite" aria-label={`${defaultQuestionLimit ?? "Todas as"} questões`}>
                 {defaultQuestionLimit ?? "Todas"}
               </span>
               <button
@@ -169,6 +172,7 @@ export default function PerfilPage() {
                   const next = defaultQuestionLimit + 5
                   setDefaultQuestionLimit(next > 500 ? null : next)
                 }}
+                aria-label="Aumentar questões por sessão"
                 className="w-10 h-10 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 +
@@ -265,7 +269,9 @@ export default function PerfilPage() {
                 Peça o código de vinculação ao seu pai, mãe ou professor(a).
               </p>
               <div className="flex gap-2">
+                <label htmlFor="perfil-linkcode" className="sr-only">Código do adulto</label>
                 <input
+                  id="perfil-linkcode"
                   type="text"
                   placeholder="Código do adulto"
                   value={linkCode}
@@ -282,10 +288,10 @@ export default function PerfilPage() {
                 </button>
               </div>
               {linkError && (
-                <p className="text-red-500 text-sm text-center">{linkError}</p>
+                <p role="alert" className="text-red-500 text-sm text-center">{linkError}</p>
               )}
               {linkSuccess && (
-                <p className="text-green-600 text-sm text-center font-semibold">{linkSuccess}</p>
+                <p role="status" className="text-green-600 text-sm text-center font-semibold">{linkSuccess}</p>
               )}
             </form>
           </div>
@@ -342,38 +348,53 @@ export default function PerfilPage() {
             className="flex flex-col gap-3"
           >
             {profile.hasPassword && (
-              <input
-                type="password"
-                placeholder="Senha atual"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
-              />
+              <div>
+                <label htmlFor="perfil-current-password" className="sr-only">Senha atual</label>
+                <input
+                  id="perfil-current-password"
+                  type="password"
+                  placeholder="Senha atual"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
+                />
+              </div>
             )}
-            <input
-              type="password"
-              placeholder="Nova senha"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={6}
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
-            />
-            <input
-              type="password"
-              placeholder="Confirmar nova senha"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={6}
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
-            />
+            <div>
+              <label htmlFor="perfil-new-password" className="sr-only">Nova senha</label>
+              <input
+                id="perfil-new-password"
+                type="password"
+                placeholder="Nova senha"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
+              />
+            </div>
+            <div>
+              <label htmlFor="perfil-confirm-password" className="sr-only">Confirmar nova senha</label>
+              <input
+                id="perfil-confirm-password"
+                type="password"
+                placeholder="Confirmar nova senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-400 focus:outline-none transition-colors"
+              />
+            </div>
             {passwordError && (
-              <p className="text-red-500 text-sm text-center">{passwordError}</p>
+              <p role="alert" className="text-red-500 text-sm text-center">{passwordError}</p>
             )}
             {passwordSuccess && (
-              <p className="text-green-600 text-sm text-center font-semibold">{passwordSuccess}</p>
+              <p role="status" className="text-green-600 text-sm text-center font-semibold">{passwordSuccess}</p>
             )}
             <button
               type="submit"
