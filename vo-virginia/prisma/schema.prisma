@@ -13,6 +13,12 @@ enum UserRole {
   TEACHER
 }
 
+enum MedalLevel {
+  BRONZE
+  SILVER
+  GOLD
+}
+
 enum OperationType {
   ADDITION
   SUBTRACTION
@@ -41,6 +47,7 @@ model User {
   children         ParentChild[]      @relation("ParentToChild")
   groups           ChildGroup[]       @relation("UserGroups")
   groupMemberships ChildGroupMember[] @relation("GroupMemberships")
+  medals           UserMedal[]
 
   @@map("users")
 }
@@ -160,4 +167,18 @@ model Answer {
 
   @@index([sessionId, answeredAt])
   @@map("answers")
+}
+
+model UserMedal {
+  id         String      @id @default(cuid())
+  userId     String
+  medalId    String
+  level      MedalLevel?
+  unlockedAt DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, medalId, level])
+  @@index([userId])
+  @@map("user_medals")
 }

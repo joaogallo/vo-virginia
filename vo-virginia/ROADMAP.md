@@ -34,28 +34,33 @@
 - [x] Som de comemoração ao completar sessão
 - [x] Animação de transição entre questões mais elaborada
 
-## v0.3.0 — Persistência e Recuperação
+## v0.3.0 — Persistência e Recuperação (Concluído)
 
 - [x] Salvar estado da sessão em `localStorage` a cada resposta
 - [x] Recuperar sessão interrompida ao abrir o app
 - [x] Enviar respostas ao backend periodicamente (não só ao final)
 - [x] Indicador de "salvando..." durante envio
 
-## v0.4.0 — Estatísticas Avançadas
+## v0.4.0 — Estatísticas Avançadas (Concluído)
 
-- [ ] Gráfico de evolução de precisão ao longo do tempo (Recharts)
-- [ ] Gráfico de tempo médio por operação
-- [ ] Filtro por período (7 dias, 30 dias, todos)
-- [ ] Exportar estatísticas em PDF para pais/professores
-- [ ] Ranking pessoal (melhores sessões)
+- [x] Gráfico de evolução de precisão ao longo do tempo (Recharts)
+- [x] Gráfico de tempo médio por operação
+- [x] Filtro por período (7 dias, 30 dias, todos)
+- [x] Exportar estatísticas em PDF para pais/professores
+- [x] Ranking pessoal (melhores sessões)
 
 ## v0.5.0 — Gamificação
 
-- [ ] Sistema de conquistas/medalhas (ex: "10 acertos seguidos", "Mestre da divisão")
+- [x] Sistema de conquistas/medalhas (17 medalhas em 6 categorias, 3 níveis)
+- [x] Sequência diária (streak) com recompensa visual (medalha Chama Acesa)
 - [ ] Nível/XP do jogador com barra de progresso
-- [ ] Sequência diária (streak) com recompensa visual
 - [ ] Avatar customizável (escolher personagem, cor)
-- [ ] Loja virtual de itens cosméticos com moedas ganhas
+
+## v0.5.1 — Feedback (Concluído)
+
+- [x] Página de feedback com formulário (tipo + mensagem)
+- [x] Envio de email via Resend para vo-virginia@habitushealth.com.br
+- [x] Link "Feedback" no menu de navegação
 
 ## v0.6.0 — Acessibilidade e i18n
 
@@ -96,3 +101,9 @@
 - [ ] Domínio personalizado
 - [ ] Termos de uso e política de privacidade (LGPD)
 - [ ] Documentação completa para contribuidores
+
+---
+
+## Backlog
+
+- [ ] Loja virtual de itens cosméticos com moedas ganhas

@@ -1,11 +1,13 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useGameStore } from "@/stores/game-store"
 import { clearSession } from "@/lib/session-storage"
 import SessionSummary from "@/components/game/SessionSummary"
+import MedalNotification from "@/components/medals/MedalNotification"
 import type { Operation } from "@/types/game"
+import type { NewMedal } from "@/lib/medal-checker"
 
 const OPERATION_MAP: Record<Operation, string> = {
   addition: "ADDITION",
@@ -18,6 +20,7 @@ export default function ResultadoPage() {
   const router = useRouter()
   const resetSetup = useGameStore((s) => s.resetSetup)
   const savedRef = useRef(false)
+  const [newMedals, setNewMedals] = useState<NewMedal[]>([])
 
   const {
     gameState,
@@ -87,6 +90,17 @@ export default function ResultadoPage() {
             wrongAnswers,
           }),
         })
+
+        // Check for new medals
+        const medalRes = await fetch("/api/medalhas/verificar", {
+          method: "POST",
+        })
+        if (medalRes.ok) {
+          const { newMedals: medals } = await medalRes.json()
+          if (medals && medals.length > 0) {
+            setNewMedals(medals)
+          }
+        }
       } catch {
         // Silently fail — não impedir o usuário de ver o resultado
       } finally {
@@ -110,6 +124,7 @@ export default function ResultadoPage() {
   return (
     <div className="w-full max-w-lg mx-auto px-4 py-8">
       <SessionSummary onPlayAgain={handlePlayAgain} onGoHome={handleGoHome} />
+      <MedalNotification medals={newMedals} />
     </div>
   )
 }
