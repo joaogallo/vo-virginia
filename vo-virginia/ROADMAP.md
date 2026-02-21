@@ -62,26 +62,25 @@
 - [x] Envio de email via Resend para vo-virginia@habitushealth.com.br
 - [x] Link "Feedback" no menu de navegação
 
-## v0.6.0 — Acessibilidade e i18n
+## v0.6.0 — Acessibilidade (Concluído)
 
-- [ ] Auditoria completa de acessibilidade (WCAG 2.1 AA)
-- [ ] Navegação por teclado em todos os componentes
-- [ ] Labels de screen reader em português
-- [ ] Modo alto contraste
-- [ ] Suporte a modo escuro (opcional, tema claro é padrão para crianças)
-- [ ] Internacionalização (i18n) para inglês e espanhol
+- [x] Auditoria completa de acessibilidade (WCAG 2.1 AA)
+- [x] Navegação por teclado em todos os componentes
+- [x] Labels de screen reader em português
+- [x] Modo alto contraste
 
-## v0.7.0 — Testes
+## v0.7.0 — Testes (Concluído)
 
-- [ ] Testes unitários do game-engine (Vitest)
-- [ ] Testes de componentes com React Testing Library
-- [ ] Testes E2E dos fluxos críticos (Playwright)
-- [ ] CI/CD com GitHub Actions (lint + test + build)
-- [ ] Coverage mínimo de 80% no game-engine
+- [x] Testes unitários do game-engine (Vitest)
+- [x] Testes de componentes com React Testing Library
+- [x] Testes E2E dos fluxos críticos (Playwright)
+- [x] CI/CD com GitHub Actions (lint + test + build)
+- [x] Coverage mínimo de 80% no game-engine
 
 ## v0.8.0 — Modo Desafio
 
-- [ ] Modo contra o tempo (resolver X questões em Y segundos)
+- [ ] Modo contra o tempo total (resolver X questões em Y segundos)
+- [ ] Modo contra o tempo por questão (resolver X questões com no máximo Y segundos cada; se estourar o tempo de uma questão interrompe o fluxo e grava a meta, o tempo por questão, a quantidade de questões respondidas e a taxa de acerto)
 - [ ] Modo maratona (questões infinitas, ver até onde vai)
 - [ ] Modo revisão (foco em questões que mais errou)
 - [ ] Histórico de modos completados
@@ -107,3 +106,5 @@
 ## Backlog
 
 - [ ] Loja virtual de itens cosméticos com moedas ganhas
+- [ ] Suporte a modo escuro (opcional, tema claro é padrão para crianças)
+- [ ] Internacionalização (i18n) para inglês e espanhol
