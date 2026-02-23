@@ -63,3 +63,12 @@ export const addGroupMembersSchema = z.object({
 export const removeGroupMemberSchema = z.object({
   childId: z.string(),
 })
+
+export const resolveNotificationSchema = z.object({
+  action: z.enum(["APPROVED", "REJECTED"]),
+})
+
+export const adminEditUserSchema = z.object({
+  name: z.string().min(2).max(100).optional(),
+  role: z.enum(["CHILD", "PARENT", "TEACHER", "ADMIN"]).optional(),
+})

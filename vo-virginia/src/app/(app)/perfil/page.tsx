@@ -23,6 +23,12 @@ interface LinkedAdult {
   role: string
 }
 
+interface PendingNameChange {
+  id: string
+  requestedName: string
+  createdAt: string
+}
+
 export default function PerfilPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [maxRetries, setMaxRetries] = useState(5)
@@ -41,12 +47,29 @@ export default function PerfilPage() {
   const [passwordSuccess, setPasswordSuccess] = useState("")
   const [savingPassword, setSavingPassword] = useState(false)
 
+  // Name editing
+  const [editingName, setEditingName] = useState(false)
+  const [newName, setNewName] = useState("")
+  const [savingName, setSavingName] = useState(false)
+  const [nameMessage, setNameMessage] = useState("")
+  const [nameError, setNameError] = useState("")
+  const [pendingNameChange, setPendingNameChange] = useState<PendingNameChange | null>(null)
+
   const fetchAdults = useCallback(() => {
     fetch("/api/vincular")
       .then((res) => res.json())
       .then((data) => {
         if (data.adults) setLinkedAdults(data.adults)
       })
+  }, [])
+
+  const fetchPending = useCallback(() => {
+    fetch("/api/notificacoes/pendentes")
+      .then((res) => res.json())
+      .then((data) => {
+        setPendingNameChange(data.pendingNameChange ?? null)
+      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -56,9 +79,12 @@ export default function PerfilPage() {
         setProfile(data)
         setMaxRetries(data.maxRetries)
         setDefaultQuestionLimit(data.defaultQuestionLimit)
-        if (data.role === "CHILD") fetchAdults()
+        if (data.role === "CHILD") {
+          fetchAdults()
+          fetchPending()
+        }
       })
-  }, [fetchAdults])
+  }, [fetchAdults, fetchPending])
 
   const handleSave = async () => {
     setSaving(true)
@@ -70,6 +96,43 @@ export default function PerfilPage() {
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleSaveName = async () => {
+    if (newName.trim().length < 2) {
+      setNameError("Nome deve ter pelo menos 2 caracteres")
+      return
+    }
+    setNameError("")
+    setNameMessage("")
+    setSavingName(true)
+
+    const res = await fetch("/api/perfil", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName.trim() }),
+    })
+    const data = await res.json()
+    setSavingName(false)
+
+    if (data.pendingApproval) {
+      setNameMessage(data.message)
+      setEditingName(false)
+      fetchPending()
+    } else if (data.name) {
+      setProfile((p) => (p ? { ...p, name: data.name } : p))
+      setEditingName(false)
+      setNameMessage("Nome atualizado!")
+      setTimeout(() => setNameMessage(""), 2000)
+    } else {
+      setNameError("Erro ao salvar nome")
+    }
+  }
+
+  const handleCancelPending = async () => {
+    await fetch("/api/notificacoes/pendentes", { method: "DELETE" })
+    setPendingNameChange(null)
+    setNameMessage("")
   }
 
   if (!profile) {
@@ -97,9 +160,74 @@ export default function PerfilPage() {
           <div className="text-5xl mb-3">
             {profile.role === "CHILD" ? "👧" : profile.role === "PARENT" ? "👨‍👩‍👧" : "👩‍🏫"}
           </div>
-          <h1 className="font-display text-2xl font-bold text-gray-800">
-            {profile.name}
-          </h1>
+
+          {/* Name section - editable */}
+          {editingName ? (
+            <div className="flex flex-col items-center gap-2">
+              <label htmlFor="perfil-edit-name" className="sr-only">Novo nome</label>
+              <input
+                id="perfil-edit-name"
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                autoFocus
+                className="text-center font-display text-2xl font-bold text-gray-800 border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-green-400 focus:outline-none transition-colors w-full max-w-xs"
+              />
+              {nameError && <p role="alert" className="text-red-500 text-sm">{nameError}</p>}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveName}
+                  disabled={savingName}
+                  className="px-4 py-2 bg-green-500 text-white font-bold text-sm rounded-lg hover:bg-green-600 disabled:opacity-50 cursor-pointer"
+                >
+                  {savingName ? "Salvando..." : "Salvar"}
+                </button>
+                <button
+                  onClick={() => { setEditingName(false); setNameError("") }}
+                  className="px-4 py-2 bg-gray-200 text-gray-600 font-bold text-sm rounded-lg hover:bg-gray-300 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="font-display text-2xl font-bold text-gray-800">
+                {profile.name}
+              </h1>
+              <button
+                onClick={() => { setNewName(profile.name); setEditingName(true); setNameMessage("") }}
+                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer"
+                aria-label="Editar nome"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* Pending name change badge */}
+          {pendingNameChange && !editingName && (
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
+                Aguardando aprovação: {pendingNameChange.requestedName}
+              </span>
+              <button
+                onClick={handleCancelPending}
+                className="text-xs text-gray-400 hover:text-red-500 cursor-pointer"
+                aria-label="Cancelar solicitação"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+
+          {/* Success/info message */}
+          {nameMessage && !editingName && (
+            <p role="status" className="text-green-600 text-sm font-semibold mt-1">{nameMessage}</p>
+          )}
+
           <p className="text-gray-500">{profile.email}</p>
           <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
             {roleLabels[profile.role]}

@@ -35,6 +35,13 @@ enum SessionMode {
   REVIEW
 }
 
+enum NotificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -57,6 +64,8 @@ model User {
   groups           ChildGroup[]       @relation("UserGroups")
   groupMemberships ChildGroupMember[] @relation("GroupMemberships")
   medals           UserMedal[]
+  notificationsReceived Notification[] @relation("NotificationsReceived")
+  notificationsSent     Notification[] @relation("NotificationsSent")
 
   @@map("users")
 }
@@ -195,4 +204,24 @@ model UserMedal {
   @@unique([userId, medalId, level])
   @@index([userId])
   @@map("user_medals")
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  recipientId String
+  senderId    String
+  type        String
+  data        Json
+  status      NotificationStatus @default(PENDING)
+  readAt      DateTime?
+  resolvedBy  String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  recipient User @relation("NotificationsReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender    User @relation("NotificationsSent", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, status])
+  @@index([senderId, type, status])
+  @@map("notifications")
 }

@@ -1,18 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { AnimatePresence, motion } from "framer-motion"
+import NotificationBell from "@/components/notifications/NotificationBell"
+import NotificationDropdown from "@/components/notifications/NotificationDropdown"
+import { useNotificationPolling } from "@/hooks/useNotifications"
+import { useNotificationStore } from "@/stores/notification-store"
 
 export default function NavLinks() {
   const { data: session } = useSession()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const { closeDropdown } = useNotificationStore()
+  const { start, stop } = useNotificationPolling()
+  const startedRef = useRef(false)
 
   const isAdult = session?.user?.role === "PARENT" || session?.user?.role === "TEACHER"
   const isAdmin = session?.user?.role === "ADMIN"
+
+  // Start polling when authenticated
+  useEffect(() => {
+    if (session?.user && !startedRef.current) {
+      startedRef.current = true
+      start()
+    }
+    return () => {
+      stop()
+      startedRef.current = false
+    }
+  }, [session?.user, start, stop])
 
   const links: { href: string; label: string; accent?: boolean }[] = [
     { href: "/desafios", label: "Desafios" },
@@ -25,6 +44,11 @@ export default function NavLinks() {
   ]
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/")
+
+  const handleLinkClick = () => {
+    setIsOpen(false)
+    closeDropdown()
+  }
 
   return (
     <>
@@ -43,38 +67,52 @@ export default function NavLinks() {
             {link.label}
           </Link>
         ))}
+        {session?.user && (
+          <div className="relative">
+            <NotificationBell />
+            <NotificationDropdown />
+          </div>
+        )}
       </nav>
 
-      {/* Mobile hamburger button */}
-      <button
-        className="md:hidden p-2 -mr-2 text-gray-600 hover:text-gray-800 cursor-pointer"
-        onClick={() => setIsOpen((v) => !v)}
-        aria-expanded={isOpen}
-        aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
+      {/* Mobile: bell + hamburger */}
+      <div className="flex items-center gap-1 md:hidden">
+        {session?.user && (
+          <div className="relative">
+            <NotificationBell />
+            <NotificationDropdown />
+          </div>
+        )}
+        <button
+          className="p-2 -mr-2 text-gray-600 hover:text-gray-800 cursor-pointer"
+          onClick={() => setIsOpen((v) => !v)}
+          aria-expanded={isOpen}
+          aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
         >
-          {isOpen ? (
-            <>
-              <line x1="6" y1="6" x2="18" y2="18" />
-              <line x1="6" y1="18" x2="18" y2="6" />
-            </>
-          ) : (
-            <>
-              <line x1="4" y1="7" x2="20" y2="7" />
-              <line x1="4" y1="12" x2="20" y2="12" />
-              <line x1="4" y1="17" x2="20" y2="17" />
-            </>
-          )}
-        </svg>
-      </button>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            {isOpen ? (
+              <>
+                <line x1="6" y1="6" x2="18" y2="18" />
+                <line x1="6" y1="18" x2="18" y2="6" />
+              </>
+            ) : (
+              <>
+                <line x1="4" y1="7" x2="20" y2="7" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="17" x2="20" y2="17" />
+              </>
+            )}
+          </svg>
+        </button>
+      </div>
 
       {/* Mobile dropdown */}
       <AnimatePresence>
@@ -92,7 +130,7 @@ export default function NavLinks() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleLinkClick}
                   className={`py-3 font-semibold border-b border-gray-100 last:border-b-0 ${
                     isActive(link.href)
                       ? "text-red-500"

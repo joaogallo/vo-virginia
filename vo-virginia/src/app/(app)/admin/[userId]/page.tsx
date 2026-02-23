@@ -38,6 +38,8 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
 }
 
+const ROLE_OPTIONS = ["CHILD", "PARENT", "TEACHER", "ADMIN"] as const
+
 function formatDuration(start: string, end: string | null): string {
   if (!end) return "—"
   const ms = new Date(end).getTime() - new Date(start).getTime()
@@ -54,6 +56,13 @@ export default function AdminUserSessionsPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+
+  // Edit state
+  const [editingUser, setEditingUser] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editRole, setEditRole] = useState("")
+  const [savingUser, setSavingUser] = useState(false)
+  const [editSuccess, setEditSuccess] = useState("")
 
   useEffect(() => {
     fetch(`/api/admin/usuarios/${userId}/sessoes`)
@@ -75,6 +84,35 @@ export default function AdminUserSessionsPage() {
     }
     setDeleting(null)
     setConfirmDelete(null)
+  }
+
+  const handleEditUser = async () => {
+    setSavingUser(true)
+    setEditSuccess("")
+    const body: Record<string, string> = {}
+    if (editName.trim() !== user?.name) body.name = editName.trim()
+    if (editRole !== user?.role) body.role = editRole
+
+    if (Object.keys(body).length === 0) {
+      setSavingUser(false)
+      setEditingUser(false)
+      return
+    }
+
+    const res = await fetch(`/api/admin/usuarios/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+
+    if (res.ok) {
+      const updated = await res.json()
+      setUser(updated)
+      setEditingUser(false)
+      setEditSuccess("Salvo!")
+      setTimeout(() => setEditSuccess(""), 2000)
+    }
+    setSavingUser(false)
   }
 
   if (loading) {
@@ -106,13 +144,75 @@ export default function AdminUserSessionsPage() {
           &larr; Voltar
         </Link>
 
+        {/* User info + edit */}
         <div className="mb-6">
-          <h1 className="font-display text-2xl font-bold text-gray-800">
-            {user.name}
-          </h1>
-          <p className="text-gray-500 text-sm">
-            {user.email} &middot; {ROLE_LABELS[user.role] || user.role}
-          </p>
+          {editingUser ? (
+            <div className="bg-white rounded-2xl p-4 shadow-lg flex flex-col gap-3">
+              <div>
+                <label htmlFor="admin-edit-name" className="text-xs font-semibold text-gray-500 mb-1 block">Nome</label>
+                <input
+                  id="admin-edit-name"
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 font-semibold text-gray-800 focus:border-red-400 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="admin-edit-role" className="text-xs font-semibold text-gray-500 mb-1 block">Papel</label>
+                <select
+                  id="admin-edit-role"
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 font-semibold text-gray-800 focus:border-red-400 focus:outline-none cursor-pointer"
+                >
+                  {ROLE_OPTIONS.map((r) => (
+                    <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEditUser}
+                  disabled={savingUser}
+                  className="px-4 py-2 bg-gradient-to-r from-red-400 to-red-600 text-white font-bold text-sm rounded-lg disabled:opacity-50 cursor-pointer"
+                >
+                  {savingUser ? "Salvando..." : "Salvar"}
+                </button>
+                <button
+                  onClick={() => setEditingUser(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-600 font-bold text-sm rounded-lg hover:bg-gray-300 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="font-display text-2xl font-bold text-gray-800">
+                  {user.name}
+                </h1>
+                <p className="text-gray-500 text-sm">
+                  {user.email} &middot; {ROLE_LABELS[user.role] || user.role}
+                </p>
+                {editSuccess && (
+                  <p className="text-green-600 text-sm font-semibold mt-1">{editSuccess}</p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setEditName(user.name)
+                  setEditRole(user.role)
+                  setEditingUser(true)
+                  setEditSuccess("")
+                }}
+                className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-bold rounded-lg hover:bg-red-100 cursor-pointer"
+              >
+                Editar
+              </button>
+            </div>
+          )}
         </div>
 
         <p className="text-gray-500 text-sm mb-4">
