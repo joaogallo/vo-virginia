@@ -5,12 +5,18 @@ import { createGroupSchema } from "@/lib/validators"
 
 export async function GET() {
   const session = await auth()
-  if (!session?.user || session.user.role === "CHILD") {
+  if (!session?.user) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   }
 
+  // For children: return groups they are members of
+  // For adults/admins: return groups they own
+  const where = session.user.role === "CHILD"
+    ? { members: { some: { childId: session.user.id } } }
+    : { userId: session.user.id }
+
   const groups = await prisma.childGroup.findMany({
-    where: { userId: session.user.id },
+    where,
     include: {
       members: {
         include: {

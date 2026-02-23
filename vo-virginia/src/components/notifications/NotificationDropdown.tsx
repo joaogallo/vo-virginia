@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNotificationStore, type NotificationItem } from "@/stores/notification-store"
 import { useNotificationList } from "@/hooks/useNotifications"
@@ -107,7 +108,123 @@ function NotificationCard({ item }: { item: NotificationItem }) {
     )
   }
 
+  if (item.type === "FRIENDSHIP_CREATED") {
+    return (
+      <div className="p-3 border-b border-gray-100 last:border-b-0">
+        <p className="text-sm text-gray-700">
+          <span className="font-bold">{data.friendName || item.sender.name}</span>
+          {" "}agora é seu amigo!
+        </p>
+        <span className="text-xs text-gray-400">{formatTime(item.createdAt)}</span>
+      </div>
+    )
+  }
+
+  if (item.type === "SESSION_COMPLETED") {
+    return (
+      <div className="p-3 border-b border-gray-100 last:border-b-0">
+        <p className="text-sm text-gray-700">
+          <span className="font-bold">{data.childName || item.sender.name}</span>
+          {" "}completou uma sessão!{" "}
+          <span className="font-semibold">{data.correctAnswers}/{data.totalQuestions}</span>
+          {" "}({data.accuracy}%)
+        </p>
+        <span className="text-xs text-gray-400">{formatTime(item.createdAt)}</span>
+      </div>
+    )
+  }
+
+  if (item.type === "FRIEND_MEDAL_EARNED") {
+    return (
+      <div className="p-3 border-b border-gray-100 last:border-b-0">
+        <p className="text-sm text-gray-700">
+          <span className="font-bold">{data.friendName || item.sender.name}</span>
+          {" "}conquistou a medalha{" "}
+          <span className="font-bold text-yellow-600">{data.medalName}</span>
+          {data.medalLevel ? ` (${data.medalLevel})` : ""}!
+        </p>
+        <span className="text-xs text-gray-400">{formatTime(item.createdAt)}</span>
+      </div>
+    )
+  }
+
+  if (item.type === "FRIEND_CHALLENGE_INVITE") {
+    return <ChallengeInviteCard item={item} data={data} />
+  }
+
+  if (item.type === "FRIEND_CHALLENGE_RESULT") {
+    return (
+      <div className="p-3 border-b border-gray-100 last:border-b-0">
+        <p className="text-sm text-gray-700">
+          Desafio com <span className="font-bold">{data.challengerName || data.challengedName || item.sender.name}</span>:{" "}
+          <span className="font-semibold">{data.yourScore}</span> vs{" "}
+          <span className="font-semibold">{data.opponentScore}</span>
+        </p>
+        <span className="text-xs text-gray-400">{formatTime(item.createdAt)}</span>
+      </div>
+    )
+  }
+
   return null
+}
+
+function ChallengeInviteCard({ item, data }: { item: NotificationItem; data: Record<string, string> }) {
+  const { optimisticRemove, decrementUnread, closeDropdown } = useNotificationStore()
+  const { fetchNotifications } = useNotificationList()
+  const router = useRouter()
+  const [responding, setResponding] = useState<string | null>(null)
+
+  const handleRespond = async (action: "ACCEPT" | "DECLINE") => {
+    setResponding(action)
+    try {
+      const res = await fetch(`/api/desafios-amigo/${data.challengeId}/responder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      })
+      if (res.ok) {
+        optimisticRemove(item.id)
+        decrementUnread()
+        fetchNotifications()
+        if (action === "ACCEPT") {
+          closeDropdown()
+          router.push(`/amigos/desafio/${data.challengeId}`)
+        }
+      }
+    } catch {
+      // silent
+    } finally {
+      setResponding(null)
+    }
+  }
+
+  return (
+    <div className="p-3 border-b border-gray-100 last:border-b-0">
+      <p className="text-sm text-gray-700">
+        <span className="font-bold">{data.challengerName || item.sender.name}</span>
+        {" "}te desafiou!
+      </p>
+      <span className="text-xs text-gray-400">{formatTime(item.createdAt)}</span>
+      {item.status === "PENDING" && (
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() => handleRespond("ACCEPT")}
+            disabled={responding !== null}
+            className="flex-1 px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 disabled:opacity-50 cursor-pointer"
+          >
+            {responding === "ACCEPT" ? "..." : "Aceitar"}
+          </button>
+          <button
+            onClick={() => handleRespond("DECLINE")}
+            disabled={responding !== null}
+            className="flex-1 px-3 py-1.5 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 disabled:opacity-50 cursor-pointer"
+          >
+            {responding === "DECLINE" ? "..." : "Recusar"}
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function NotificationDropdown() {

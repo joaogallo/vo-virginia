@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { updateProfileSchema } from "@/lib/validators"
+import { updateProfileSchema, updateFriendshipSettingsSchema } from "@/lib/validators"
 
 export async function GET() {
   const session = await auth()
@@ -20,6 +20,9 @@ export async function GET() {
       maxRetries: true,
       defaultQuestionLimit: true,
       linkCode: true,
+      friendCode: true,
+      friendshipEnabled: true,
+      challengeEnabled: true,
       createdAt: true,
       passwordHash: true,
     },
@@ -120,10 +123,42 @@ export async function PATCH(req: NextRequest) {
     })
   }
 
+  // Handle social settings (friendshipEnabled, challengeEnabled)
+  const socialParsed = updateFriendshipSettingsSchema.safeParse(body)
+  if (socialParsed.success) {
+    const { friendshipEnabled, challengeEnabled } = socialParsed.data
+    if (friendshipEnabled !== undefined || challengeEnabled !== undefined) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true },
+      })
+
+      // Children with linked adults cannot change their own social settings
+      if (currentUser?.role === "CHILD") {
+        const linkedAdults = await prisma.parentChild.findMany({
+          where: { childId: session.user.id },
+          select: { parentId: true },
+        })
+        if (linkedAdults.length > 0) {
+          return NextResponse.json({ error: "Configurações sociais são controladas pelo responsável" }, { status: 403 })
+        }
+      }
+
+      const socialData: Record<string, boolean> = {}
+      if (friendshipEnabled !== undefined) socialData.friendshipEnabled = friendshipEnabled
+      if (challengeEnabled !== undefined) socialData.challengeEnabled = challengeEnabled
+
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: socialData,
+      })
+    }
+  }
+
   // If only settings were updated (no name), return updated profile
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, role: true, maxRetries: true, defaultQuestionLimit: true },
+    select: { id: true, name: true, email: true, role: true, maxRetries: true, defaultQuestionLimit: true, friendshipEnabled: true, challengeEnabled: true, friendCode: true },
   })
   return NextResponse.json(user)
 }

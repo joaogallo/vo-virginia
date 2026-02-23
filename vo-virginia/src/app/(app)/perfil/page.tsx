@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { signOut } from "next-auth/react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 
 interface Profile {
   id: string
@@ -12,6 +13,9 @@ interface Profile {
   maxRetries: number
   defaultQuestionLimit: number | null
   linkCode: string | null
+  friendCode: string | null
+  friendshipEnabled: boolean
+  challengeEnabled: boolean
   hasPassword: boolean
 }
 
@@ -27,6 +31,14 @@ interface PendingNameChange {
   id: string
   requestedName: string
   createdAt: string
+}
+
+interface Friend {
+  id: string
+  name: string
+  friendshipId: string
+  status: string
+  blockedBy: string | null
 }
 
 export default function PerfilPage() {
@@ -55,6 +67,16 @@ export default function PerfilPage() {
   const [nameError, setNameError] = useState("")
   const [pendingNameChange, setPendingNameChange] = useState<PendingNameChange | null>(null)
 
+  // Friends
+  const [friends, setFriends] = useState<Friend[]>([])
+  const [friendCode, setFriendCode] = useState("")
+  const [addingFriend, setAddingFriend] = useState(false)
+  const [friendError, setFriendError] = useState("")
+  const [friendSuccess, setFriendSuccess] = useState("")
+  const [generatingCode, setGeneratingCode] = useState(false)
+  const [removingId, setRemovingId] = useState<string | null>(null)
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+
   const fetchAdults = useCallback(() => {
     fetch("/api/vincular")
       .then((res) => res.json())
@@ -72,6 +94,13 @@ export default function PerfilPage() {
       .catch(() => {})
   }, [])
 
+  const fetchFriends = useCallback(() => {
+    fetch("/api/amizades")
+      .then((res) => res.json())
+      .then((data) => setFriends(data.friends || []))
+      .catch(() => {})
+  }, [])
+
   useEffect(() => {
     fetch("/api/perfil")
       .then((res) => res.json())
@@ -83,8 +112,11 @@ export default function PerfilPage() {
           fetchAdults()
           fetchPending()
         }
+        if (data.friendshipEnabled) {
+          fetchFriends()
+        }
       })
-  }, [fetchAdults, fetchPending])
+  }, [fetchAdults, fetchPending, fetchFriends])
 
   const handleSave = async () => {
     setSaving(true)
@@ -424,6 +456,245 @@ export default function PerfilPage() {
             </form>
           </div>
         )}
+
+        {/* Social (amizades / desafios) */}
+        <div className="border-t border-gray-100 pt-6 mt-6">
+          <h2 className="font-display text-lg font-bold text-gray-700 mb-4">
+            Amigos
+          </h2>
+
+          {/* Toggles */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="font-semibold text-gray-700">Amizades</p>
+              <p className="text-sm text-gray-500">Permitir adicionar amigos</p>
+            </div>
+            {profile.role === "CHILD" && linkedAdults.length > 0 ? (
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-12 h-7 rounded-full relative ${profile.friendshipEnabled ? "bg-green-300" : "bg-gray-200"} opacity-50`}
+                >
+                  <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${profile.friendshipEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
+                </div>
+                <span className="text-xs text-gray-400">Controlado pelo responsável</span>
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  const newVal = !profile.friendshipEnabled
+                  setProfile((p) => p ? { ...p, friendshipEnabled: newVal } : p)
+                  await fetch("/api/perfil", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ friendshipEnabled: newVal }),
+                  })
+                  if (newVal) fetchFriends()
+                }}
+                className={`w-12 h-7 rounded-full relative cursor-pointer transition-colors ${profile.friendshipEnabled ? "bg-green-500" : "bg-gray-300"}`}
+                role="switch"
+                aria-checked={profile.friendshipEnabled}
+                aria-label="Habilitar amizades"
+              >
+                <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${profile.friendshipEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="font-semibold text-gray-700">Desafios</p>
+              <p className="text-sm text-gray-500">Receber desafios de amigos</p>
+            </div>
+            {profile.role === "CHILD" && linkedAdults.length > 0 ? (
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-12 h-7 rounded-full relative ${profile.challengeEnabled ? "bg-green-300" : "bg-gray-200"} opacity-50`}
+                >
+                  <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${profile.challengeEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
+                </div>
+                <span className="text-xs text-gray-400">Controlado pelo responsável</span>
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  const newVal = !profile.challengeEnabled
+                  setProfile((p) => p ? { ...p, challengeEnabled: newVal } : p)
+                  await fetch("/api/perfil", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ challengeEnabled: newVal }),
+                  })
+                }}
+                className={`w-12 h-7 rounded-full relative cursor-pointer transition-colors ${profile.challengeEnabled ? "bg-green-500" : "bg-gray-300"}`}
+                role="switch"
+                aria-checked={profile.challengeEnabled}
+                aria-label="Habilitar desafios"
+              >
+                <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${profile.challengeEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
+              </button>
+            )}
+          </div>
+
+          {/* Friends section (when enabled) */}
+          {profile.friendshipEnabled && (
+            <>
+              {/* My friend code */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                <p className="text-xs text-gray-500 mb-2">Meu código de amigo</p>
+                {profile.friendCode ? (
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-2xl font-bold text-gray-800 tracking-wider">
+                      {profile.friendCode}
+                    </span>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(profile.friendCode!)}
+                      className="px-4 py-2 bg-green-50 text-green-600 text-sm font-bold rounded-lg hover:bg-green-100 cursor-pointer"
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setGeneratingCode(true)
+                      const res = await fetch("/api/amizades/codigo", { method: "POST" })
+                      if (res.ok) {
+                        const data = await res.json()
+                        setProfile((p) => p ? { ...p, friendCode: data.friendCode } : p)
+                      }
+                      setGeneratingCode(false)
+                    }}
+                    disabled={generatingCode}
+                    className="w-full py-3 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold rounded-xl shadow disabled:opacity-50 cursor-pointer"
+                  >
+                    {generatingCode ? "Gerando..." : "Gerar meu código"}
+                  </button>
+                )}
+              </div>
+
+              {/* Add friend */}
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault()
+                  setFriendError("")
+                  setFriendSuccess("")
+                  setAddingFriend(true)
+
+                  const res = await fetch("/api/amizades", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ friendCode: friendCode.trim().toUpperCase() }),
+                  })
+
+                  const data = await res.json()
+                  setAddingFriend(false)
+
+                  if (res.ok) {
+                    setFriendSuccess(`Amizade com ${data.friendName} criada!`)
+                    setFriendCode("")
+                    fetchFriends()
+                    setTimeout(() => setFriendSuccess(""), 3000)
+                  } else {
+                    setFriendError(data.error || "Erro ao adicionar amigo")
+                  }
+                }}
+                className="flex gap-2 mb-2"
+              >
+                <label htmlFor="perfil-friend-code" className="sr-only">Código do amigo</label>
+                <input
+                  id="perfil-friend-code"
+                  type="text"
+                  placeholder="Código do amigo"
+                  value={friendCode}
+                  onChange={(e) => setFriendCode(e.target.value.toUpperCase())}
+                  required
+                  className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 text-lg font-mono tracking-wider text-center uppercase focus:border-green-400 focus:outline-none transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={addingFriend || !friendCode.trim()}
+                  className="px-6 py-3 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold rounded-xl shadow disabled:opacity-50 cursor-pointer"
+                >
+                  {addingFriend ? "..." : "Adicionar"}
+                </button>
+              </form>
+              {friendError && <p role="alert" className="text-red-500 text-sm text-center mb-2">{friendError}</p>}
+              {friendSuccess && <p role="status" className="text-green-600 text-sm text-center font-semibold mb-2">{friendSuccess}</p>}
+
+              {/* Friends list */}
+              <p className="text-gray-500 text-sm mt-4 mb-2">{friends.length} amigos</p>
+              {friends.length === 0 ? (
+                <p className="text-gray-400 text-sm">Compartilhe seu código com seus amigos!</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <AnimatePresence>
+                    {friends.map((friend) => (
+                      <motion.div
+                        key={friend.friendshipId}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center justify-between bg-gray-50 rounded-xl p-3"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm">
+                            👧
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-800 truncate text-sm">{friend.name}</p>
+                            {friend.status === "BLOCKED" && (
+                              <span className="text-xs text-red-500 font-semibold">Bloqueado</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {friend.status === "ACTIVE" && profile.challengeEnabled && (
+                            <Link
+                              href={`/amigos?desafiar=${friend.id}`}
+                              className="px-2 py-1 bg-orange-50 text-orange-600 text-xs font-bold rounded-lg hover:bg-orange-100"
+                            >
+                              Desafiar
+                            </Link>
+                          )}
+                          {confirmRemove === friend.friendshipId ? (
+                            <div className="flex gap-1">
+                              <button
+                                onClick={async () => {
+                                  setRemovingId(friend.friendshipId)
+                                  const res = await fetch(`/api/amizades/${friend.friendshipId}`, { method: "DELETE" })
+                                  if (res.ok) setFriends((prev) => prev.filter((f) => f.friendshipId !== friend.friendshipId))
+                                  setRemovingId(null)
+                                  setConfirmRemove(null)
+                                }}
+                                disabled={removingId === friend.friendshipId}
+                                className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg disabled:opacity-50 cursor-pointer"
+                              >
+                                {removingId === friend.friendshipId ? "..." : "Sim"}
+                              </button>
+                              <button
+                                onClick={() => setConfirmRemove(null)}
+                                className="px-2 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-lg cursor-pointer"
+                              >
+                                Não
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmRemove(friend.friendshipId)}
+                              className="px-2 py-1 bg-red-50 text-red-500 text-xs font-bold rounded-lg hover:bg-red-100 cursor-pointer"
+                            >
+                              Remover
+                            </button>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Alterar / Criar senha */}
         <div className="border-t border-gray-100 pt-6 mt-6">

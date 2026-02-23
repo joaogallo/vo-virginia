@@ -14,6 +14,7 @@ export default function NavLinks() {
   const { data: session } = useSession()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [showRanking, setShowRanking] = useState(false)
   const { closeDropdown } = useNotificationStore()
   const { start, stop } = useNotificationPolling()
   const startedRef = useRef(false)
@@ -33,9 +34,22 @@ export default function NavLinks() {
     }
   }, [session?.user, start, stop])
 
+  // Check if user has groups with leaderboard enabled
+  useEffect(() => {
+    if (!session?.user) return
+    fetch("/api/grupos")
+      .then((r) => r.json())
+      .then((data) => {
+        const groups = data.groups || []
+        setShowRanking(groups.some((g: { leaderboardEnabled?: boolean }) => g.leaderboardEnabled))
+      })
+      .catch(() => {})
+  }, [session?.user])
+
   const links: { href: string; label: string; accent?: boolean }[] = [
     { href: "/desafios", label: "Desafios" },
     { href: "/medalhas", label: "Medalhas" },
+    ...(showRanking ? [{ href: "/ranking", label: "Ranking" }] : []),
     { href: "/estatisticas", label: "Estatísticas" },
     ...(isAdult ? [{ href: "/painel", label: "Painel" }] : []),
     { href: "/feedback", label: "Feedback" },

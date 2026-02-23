@@ -22,6 +22,8 @@ export async function GET() {
             take: 1,
             select: { startedAt: true },
           },
+          friendshipEnabled: true,
+          challengeEnabled: true,
           _count: { select: { gameSessions: true } },
         },
       },
@@ -35,6 +37,8 @@ export async function GET() {
     image: link.child.image,
     lastSessionAt: link.child.gameSessions[0]?.startedAt || null,
     totalSessions: link.child._count.gameSessions,
+    friendshipEnabled: link.child.friendshipEnabled,
+    challengeEnabled: link.child.challengeEnabled,
   }))
 
   return NextResponse.json({ children })

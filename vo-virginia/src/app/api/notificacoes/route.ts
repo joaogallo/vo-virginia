@@ -12,14 +12,26 @@ export async function GET(req: NextRequest) {
 
   // Quick unread count for polling
   if (searchParams.get("unreadCount") === "true") {
-    const unreadCount = await prisma.notification.count({
-      where: {
-        recipientId: session.user.id,
-        readAt: null,
-        status: "PENDING",
-      },
-    })
-    return NextResponse.json({ unreadCount })
+    // Count actionable notifications (PENDING status) + informational unread (readAt null)
+    const actionableTypes = ["PROFILE_CHANGE_REQUEST", "FRIEND_CHALLENGE_INVITE"]
+    const [actionableCount, informationalCount] = await Promise.all([
+      prisma.notification.count({
+        where: {
+          recipientId: session.user.id,
+          readAt: null,
+          status: "PENDING",
+          type: { in: actionableTypes },
+        },
+      }),
+      prisma.notification.count({
+        where: {
+          recipientId: session.user.id,
+          readAt: null,
+          type: { notIn: actionableTypes },
+        },
+      }),
+    ])
+    return NextResponse.json({ unreadCount: actionableCount + informationalCount })
   }
 
   // Full list
@@ -33,6 +45,18 @@ export async function GET(req: NextRequest) {
       },
     },
   })
+
+  // Mark informational notifications as read when fetched
+  const informationalIds = notifications
+    .filter((n) => !["PROFILE_CHANGE_REQUEST", "FRIEND_CHALLENGE_INVITE"].includes(n.type) && !n.readAt)
+    .map((n) => n.id)
+
+  if (informationalIds.length > 0) {
+    await prisma.notification.updateMany({
+      where: { id: { in: informationalIds } },
+      data: { readAt: new Date() },
+    })
+  }
 
   return NextResponse.json({ notifications })
 }

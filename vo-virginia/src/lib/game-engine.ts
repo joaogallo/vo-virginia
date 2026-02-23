@@ -1,4 +1,5 @@
 import type { Question, GameState, Operation, SessionMode } from "@/types/game"
+import { seededShuffle } from "@/lib/seeded-random"
 
 let questionIdCounter = 0
 
@@ -39,6 +40,30 @@ export function generateQuestions(
   }
 
   return questions
+}
+
+/**
+ * Gera questões com shuffle determinístico baseado em seed.
+ * Usado para desafios entre amigos — ambos recebem as mesmas questões na mesma ordem.
+ */
+export function generateQuestionsWithSeed(
+  operations: Operation[],
+  numbers: number[],
+  seed: string,
+): Question[] {
+  const questions: Question[] = []
+
+  for (const op of operations) {
+    for (const x of numbers) {
+      for (let y = 0; y <= 10; y++) {
+        if (op === "division" && x === 0) continue
+        const question = buildQuestion(op, x, y)
+        questions.push(question)
+      }
+    }
+  }
+
+  return seededShuffle(questions, seed)
 }
 
 /**

@@ -72,3 +72,40 @@ export const adminEditUserSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   role: z.enum(["CHILD", "PARENT", "TEACHER", "ADMIN"]).optional(),
 })
+
+export const addFriendSchema = z.object({
+  friendCode: z.string().min(1),
+})
+
+export const updateFriendshipSettingsSchema = z.object({
+  friendshipEnabled: z.boolean().optional(),
+  challengeEnabled: z.boolean().optional(),
+})
+
+export const updateChildSocialSchema = z.object({
+  childId: z.string(),
+  friendshipEnabled: z.boolean().optional(),
+  challengeEnabled: z.boolean().optional(),
+})
+
+export const createChallengeSchema = z.object({
+  friendId: z.string(),
+  operations: z.array(z.enum(["ADDITION", "SUBTRACTION", "MULTIPLICATION", "DIVISION"])).min(1),
+  numbers: z.array(z.number().int()).min(1),
+  totalQuestions: z.number().int().min(5).max(50),
+})
+
+export const respondChallengeSchema = z.object({
+  action: z.enum(["ACCEPT", "DECLINE"]),
+})
+
+export const updateChallengeProgressSchema = z.object({
+  correct: z.number().int().min(0),
+  wrong: z.number().int().min(0),
+  finished: z.boolean(),
+  timeMs: z.number().int().optional(),
+})
+
+export const updateGroupLeaderboardSchema = z.object({
+  leaderboardEnabled: z.boolean(),
+})

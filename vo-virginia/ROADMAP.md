@@ -59,7 +59,7 @@
 ## v0.5.1 — Feedback (Concluído)
 
 - [x] Página de feedback com formulário (tipo + mensagem)
-- [x] Envio de email via Resend para vo-virginia@habitushealth.com.br
+- [x] Envio de email via Resend para <vo-virginia@habitushealth.com.br>
 - [x] Link "Feedback" no menu de navegação
 
 ## v0.6.0 — Acessibilidade (Concluído)
@@ -85,19 +85,33 @@
 - [x] Modo revisão (foco em questões que mais errou)
 - [x] Histórico de modos completados
 
-## v0.9.0 — Social e Multiplayer
+## v0.9.0 — Social e Multiplayer (Concluído)
 
-- [ ] Desafio entre amigos (gerar link, competir em tempo real)
-- [ ] Quadro de líderes da turma (professor cria sala)
-- [ ] Compartilhar conquistas
-- [ ] Notificações para pais quando criança completar sessão
+- [x] Sistema de amizade por código (semelhante à vinculação de responsáveis/professores)
+  - Crianças sem responsável vinculado podem habilitar/desabilitar o recurso de amizade livremente (toggle on/off no perfil)
+  - Crianças com responsável vinculado veem o toggle em estado somente-leitura (cinza, não clicável) mostrando se o recurso está habilitado ou desabilitado — apenas o responsável pode alterar
+  - Pais/responsáveis habilitam ou desabilitam o recurso de amizade para a criança
+  - Criança gera código de amizade; o amigo insere o código para criar o vínculo
+  - Pais e crianças podem desfazer uma amizade
+  - Pais podem bloquear uma amizade específica (vínculo mantido, mas interação impedida)
+  - Seção de amigos integrada ao Perfil (código, adicionar, lista)
+- [x] Desafio entre amigos (competir em tempo real)
+  - Pais/responsáveis devem autorizar a funcionalidade de desafio para a criança
+  - Notificação na tela do amigo convidando para o desafio (sem necessidade de link externo)
+  - Questões determinísticas via seed (ambos jogadores recebem as mesmas questões)
+  - Progresso do oponente em tempo real via polling (2.5s)
+- [x] Quadro de líderes da turma
+  - Professor cria sala/turma e configura se o quadro de líderes está habilitado ou não para os alunos
+  - Menu "Ranking" aparece apenas se houver ranking disponível
+  - Filtro por período (7d, 30d, todos)
+- [x] Compartilhar conquistas (medalhas notificadas para amigos)
+- [x] Notificações para pais quando criança completar sessão
 
 ## v1.0.0 — Lançamento
 
 - [ ] PWA (Progressive Web App) com suporte offline
 - [ ] Favicon e ícones do app customizados
 - [ ] Open Graph e SEO otimizados para landing page
-- [ ] Domínio personalizado
 - [ ] Termos de uso e política de privacidade (LGPD)
 - [ ] Documentação completa para contribuidores
 
@@ -108,3 +122,4 @@
 - [ ] Loja virtual de itens cosméticos com moedas ganhas
 - [ ] Suporte a modo escuro (opcional, tema claro é padrão para crianças)
 - [ ] Internacionalização (i18n) para inglês e espanhol
+- [ ] Domínio personalizado

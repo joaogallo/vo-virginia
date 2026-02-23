@@ -15,6 +15,7 @@ interface GroupMember {
 interface Group {
   id: string
   name: string
+  leaderboardEnabled: boolean
   members: GroupMember[]
   _count: { members: number }
 }
@@ -234,6 +235,34 @@ export default function GroupManager({ children }: GroupManagerProps) {
                     className="overflow-hidden"
                   >
                     <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+                      {/* Leaderboard toggle */}
+                      <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-700">Quadro de Líderes</p>
+                          <p className="text-xs text-gray-500">Visível para os alunos</p>
+                        </div>
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            const newVal = !group.leaderboardEnabled
+                            setGroups((prev) =>
+                              prev.map((g) => g.id === group.id ? { ...g, leaderboardEnabled: newVal } : g)
+                            )
+                            await fetch(`/api/grupos/${group.id}`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ leaderboardEnabled: newVal }),
+                            })
+                          }}
+                          className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${group.leaderboardEnabled ? "bg-green-500" : "bg-gray-300"}`}
+                          role="switch"
+                          aria-checked={group.leaderboardEnabled}
+                          aria-label="Habilitar quadro de líderes"
+                        >
+                          <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${group.leaderboardEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                        </button>
+                      </div>
+
                       {/* Membros */}
                       {group.members.length > 0 ? (
                         <div className="flex flex-col gap-2 mb-3">

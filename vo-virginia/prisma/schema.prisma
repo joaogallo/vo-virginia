@@ -42,6 +42,19 @@ enum NotificationStatus {
   CANCELLED
 }
 
+enum FriendshipStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum ChallengeStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  DECLINED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -53,6 +66,9 @@ model User {
   maxRetries           Int       @default(5)
   defaultQuestionLimit Int?
   linkCode             String?   @unique
+  friendCode           String?   @unique
+  friendshipEnabled    Boolean   @default(false)
+  challengeEnabled     Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -66,6 +82,10 @@ model User {
   medals           UserMedal[]
   notificationsReceived Notification[] @relation("NotificationsReceived")
   notificationsSent     Notification[] @relation("NotificationsSent")
+  friendshipsInitiated  Friendship[]      @relation("FriendshipInitiator")
+  friendshipsReceived   Friendship[]      @relation("FriendshipReceiver")
+  challengesIssued      FriendChallenge[] @relation("ChallengesIssued")
+  challengesReceived    FriendChallenge[] @relation("ChallengesReceived")
 
   @@map("users")
 }
@@ -129,6 +149,8 @@ model ChildGroup {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  leaderboardEnabled Boolean @default(false)
 
   owner   User               @relation("UserGroups", fields: [userId], references: [id], onDelete: Cascade)
   members ChildGroupMember[]
@@ -224,4 +246,55 @@ model Notification {
   @@index([recipientId, status])
   @@index([senderId, type, status])
   @@map("notifications")
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  initiatorId String
+  receiverId  String
+  status      FriendshipStatus @default(ACTIVE)
+  blockedBy   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  initiator User @relation("FriendshipInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  receiver  User @relation("FriendshipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([initiatorId, receiverId])
+  @@index([initiatorId, status])
+  @@index([receiverId, status])
+  @@map("friendships")
+}
+
+model FriendChallenge {
+  id             String          @id @default(cuid())
+  challengerId   String
+  challengedId   String
+  operations     OperationType[]
+  numbers        Int[]
+  totalQuestions Int
+  questionsSeed  String
+  status         ChallengeStatus @default(PENDING)
+
+  challengerCorrect  Int     @default(0)
+  challengerWrong    Int     @default(0)
+  challengerFinished Boolean @default(false)
+  challengerTime     Int?
+
+  challengedCorrect  Int     @default(0)
+  challengedWrong    Int     @default(0)
+  challengedFinished Boolean @default(false)
+  challengedTime     Int?
+
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  challenger User @relation("ChallengesIssued", fields: [challengerId], references: [id], onDelete: Cascade)
+  challenged User @relation("ChallengesReceived", fields: [challengedId], references: [id], onDelete: Cascade)
+
+  @@index([challengerId, status])
+  @@index([challengedId, status])
+  @@map("friend_challenges")
 }

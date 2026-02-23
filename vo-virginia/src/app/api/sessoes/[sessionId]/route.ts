@@ -64,5 +64,38 @@ export async function PATCH(
     return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 })
   }
 
+  // Notify linked adults when child completes a session
+  if (parsed.data.completed) {
+    try {
+      const linkedAdults = await prisma.parentChild.findMany({
+        where: { childId: session.user.id },
+        select: { parentId: true },
+      })
+
+      if (linkedAdults.length > 0) {
+        const { correctAnswers, totalQuestions: tq } = parsed.data
+        const total = tq ?? parsed.data.correctAnswers + parsed.data.wrongAnswers
+        const accuracy = total > 0 ? Math.round((correctAnswers / total) * 100) : 0
+
+        await prisma.notification.createMany({
+          data: linkedAdults.map((link) => ({
+            recipientId: link.parentId,
+            senderId: session.user.id,
+            type: "SESSION_COMPLETED",
+            data: {
+              childName: session.user.name,
+              correctAnswers: String(correctAnswers),
+              totalQuestions: String(total),
+              accuracy: String(accuracy),
+            },
+            status: "APPROVED" as const,
+          })),
+        })
+      }
+    } catch {
+      // Don't fail the session end if notifications fail
+    }
+  }
+
   return NextResponse.json({ success: true })
 }
