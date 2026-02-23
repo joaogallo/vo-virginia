@@ -16,6 +16,7 @@ const baloo = Baloo_2({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://vo-virginia.vercel.app"),
   title: "Vó Virgínia - Aprenda Matemática Brincando!",
   description:
     "Pratique adição, subtração, multiplicação e divisão de forma divertida com a Vó Virgínia!",
@@ -33,6 +34,22 @@ export const metadata: Metadata = {
     title: "Vó Virgínia",
     statusBarStyle: "default",
   },
+  openGraph: {
+    title: "Vó Virgínia - Aprenda Matemática Brincando!",
+    description: "Pratique adição, subtração, multiplicação e divisão de forma divertida com a Vó Virgínia!",
+    url: "https://vo-virginia.vercel.app",
+    siteName: "Vó Virgínia",
+    locale: "pt_BR",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vó Virgínia - Aprenda Matemática Brincando" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vó Virgínia - Aprenda Matemática Brincando!",
+    description: "Pratique adição, subtração, multiplicação e divisão de forma divertida com a Vó Virgínia!",
+    images: ["/og-image.png"],
+  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({

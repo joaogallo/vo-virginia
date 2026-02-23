@@ -49,6 +49,15 @@ export default function HomePage() {
           <br />
           <span className="not-italic font-medium text-gray-500">— João Guilherme Gallo</span>
         </p>
+
+        <footer className="mt-12 flex justify-center gap-4 text-xs text-gray-400">
+          <Link href="/termos-de-uso" className="hover:text-gray-600 hover:underline">
+            Termos de Uso
+          </Link>
+          <Link href="/politica-de-privacidade" className="hover:text-gray-600 hover:underline">
+            Política de Privacidade
+          </Link>
+        </footer>
       </div>
     </main>
   )

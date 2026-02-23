@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /jogar
+Disallow: /perfil
+Disallow: /painel
+Disallow: /estatisticas
+Disallow: /medalhas
+Disallow: /desafios
+Disallow: /ranking
+Disallow: /amigos
+Disallow: /admin
+
+Sitemap: https://vo-virginia.vercel.app/sitemap.xml

@@ -107,13 +107,14 @@
 - [x] Compartilhar conquistas (medalhas notificadas para amigos)
 - [x] Notificações para pais quando criança completar sessão
 
-## v1.0.0 — Lançamento
+## v1.0.0 — Lançamento (Concluído)
 
-- [ ] PWA (Progressive Web App) com suporte offline
-- [ ] Favicon e ícones do app customizados
-- [ ] Open Graph e SEO otimizados para landing page
-- [ ] Termos de uso e política de privacidade (LGPD)
-- [ ] Documentação completa para contribuidores
+- [x] PWA (Progressive Web App) com suporte offline via Serwist
+- [x] Favicon e ícones do app customizados
+- [x] Open Graph e SEO otimizados para landing page
+- [x] Termos de uso e política de privacidade (LGPD)
+- [x] Documentação completa para contribuidores (CONTRIBUTING.md)
+- [x] Perfil de adultos com crianças vinculadas (dados da última sessão, configurações sociais, gerenciamento de amizades)
 
 ---
 

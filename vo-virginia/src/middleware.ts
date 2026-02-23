@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
   const isAuthenticated = !!token
   const userRole = token?.role as string | undefined
 
-  const publicRoutes = ["/", "/entrar", "/cadastro", "/guia-pedagogico"]
+  const publicRoutes = ["/", "/entrar", "/cadastro", "/guia-pedagogico", "/~offline", "/termos-de-uso", "/politica-de-privacidade"]
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   )
@@ -41,6 +41,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|animations|images|fonts).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|animations|images|fonts|sw\\.js|serwist-precache-manifest).*)",
   ],
 }

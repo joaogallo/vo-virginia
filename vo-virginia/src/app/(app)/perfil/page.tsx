@@ -41,6 +41,37 @@ interface Friend {
   blockedBy: string | null
 }
 
+interface LastSession {
+  operations: string[]
+  totalQuestions: number
+  correctAnswers: number
+  accuracy: number
+}
+
+interface LinkedChild {
+  id: string
+  name: string
+  friendshipEnabled: boolean
+  challengeEnabled: boolean
+  totalSessions: number
+  lastSession: LastSession | null
+}
+
+interface ChildFriend {
+  id: string
+  name: string
+  friendshipId: string
+  status: string
+  blockedBy: string | null
+}
+
+const opSymbol: Record<string, string> = {
+  ADDITION: "+",
+  SUBTRACTION: "\u2212",
+  MULTIPLICATION: "\u00d7",
+  DIVISION: "\u00f7",
+}
+
 export default function PerfilPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [maxRetries, setMaxRetries] = useState(5)
@@ -66,6 +97,14 @@ export default function PerfilPage() {
   const [nameMessage, setNameMessage] = useState("")
   const [nameError, setNameError] = useState("")
   const [pendingNameChange, setPendingNameChange] = useState<PendingNameChange | null>(null)
+
+  // Linked children (for adults)
+  const [linkedChildren, setLinkedChildren] = useState<LinkedChild[]>([])
+  const [expandedChildId, setExpandedChildId] = useState<string | null>(null)
+  const [childFriends, setChildFriends] = useState<Record<string, ChildFriend[]>>({})
+  const [blockingId, setBlockingId] = useState<string | null>(null)
+  const [deletingFriendId, setDeletingFriendId] = useState<string | null>(null)
+  const [confirmDeleteFriend, setConfirmDeleteFriend] = useState<string | null>(null)
 
   // Friends
   const [friends, setFriends] = useState<Friend[]>([])
@@ -101,6 +140,65 @@ export default function PerfilPage() {
       .catch(() => {})
   }, [])
 
+  const fetchChildren = useCallback(() => {
+    fetch("/api/filhos")
+      .then((res) => res.json())
+      .then((data) => setLinkedChildren(data.children || []))
+      .catch(() => {})
+  }, [])
+
+  const fetchChildFriendsFor = useCallback((childId: string) => {
+    fetch(`/api/amizades?childId=${childId}`)
+      .then((res) => res.json())
+      .then((data) => setChildFriends((prev) => ({ ...prev, [childId]: data.friends || [] })))
+      .catch(() => {})
+  }, [])
+
+  const handleToggleChildSocial = async (childId: string, field: "friendshipEnabled" | "challengeEnabled") => {
+    const child = linkedChildren.find((c) => c.id === childId)
+    if (!child) return
+    const newVal = !child[field]
+    setLinkedChildren((prev) => prev.map((c) => c.id === childId ? { ...c, [field]: newVal } : c))
+    await fetch("/api/filhos/social", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ childId, [field]: newVal }),
+    })
+  }
+
+  const handleBlockChildFriend = async (friendshipId: string, currentlyBlocked: boolean, childId: string) => {
+    setBlockingId(friendshipId)
+    const res = await fetch(`/api/amizades/${friendshipId}/bloquear`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ blocked: !currentlyBlocked }),
+    })
+    if (res.ok) {
+      setChildFriends((prev) => ({
+        ...prev,
+        [childId]: (prev[childId] || []).map((f) =>
+          f.friendshipId === friendshipId
+            ? { ...f, status: currentlyBlocked ? "ACTIVE" : "BLOCKED" }
+            : f
+        ),
+      }))
+    }
+    setBlockingId(null)
+  }
+
+  const handleDeleteChildFriend = async (friendshipId: string, childId: string) => {
+    setDeletingFriendId(friendshipId)
+    const res = await fetch(`/api/amizades/${friendshipId}`, { method: "DELETE" })
+    if (res.ok) {
+      setChildFriends((prev) => ({
+        ...prev,
+        [childId]: (prev[childId] || []).filter((f) => f.friendshipId !== friendshipId),
+      }))
+    }
+    setDeletingFriendId(null)
+    setConfirmDeleteFriend(null)
+  }
+
   useEffect(() => {
     fetch("/api/perfil")
       .then((res) => res.json())
@@ -112,11 +210,14 @@ export default function PerfilPage() {
           fetchAdults()
           fetchPending()
         }
+        if (data.role !== "CHILD") {
+          fetchChildren()
+        }
         if (data.friendshipEnabled) {
           fetchFriends()
         }
       })
-  }, [fetchAdults, fetchPending, fetchFriends])
+  }, [fetchAdults, fetchPending, fetchFriends, fetchChildren])
 
   const handleSave = async () => {
     setSaving(true)
@@ -179,7 +280,10 @@ export default function PerfilPage() {
     CHILD: "Criança",
     PARENT: "Pai/Mãe",
     TEACHER: "Professor(a)",
+    ADMIN: "Administrador",
   }
+
+  const isAdult = profile.role !== "CHILD"
 
   return (
     <div className="w-full max-w-lg mx-auto px-4">
@@ -362,6 +466,159 @@ export default function PerfilPage() {
               <span className="font-mono text-3xl font-bold text-gray-800 tracking-wider">
                 {profile.linkCode}
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* Crianças vinculadas (para adultos) */}
+        {isAdult && linkedChildren.length > 0 && (
+          <div className="border-t border-gray-100 pt-6 mt-6">
+            <h2 className="font-display text-lg font-bold text-gray-700 mb-4">
+              Crianças vinculadas
+            </h2>
+            <div className="flex flex-col gap-3">
+              {linkedChildren.map((child) => (
+                <div key={child.id} className="bg-gray-50 rounded-xl overflow-hidden">
+                  {/* Child header */}
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-lg">
+                        👧
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-800 truncate">{child.name}</p>
+                        {child.lastSession ? (
+                          <p className="text-xs text-gray-500">
+                            {child.lastSession.operations.map((op) => opSymbol[op] || op).join(" ")}{" "}
+                            &middot; {child.lastSession.correctAnswers}/{child.lastSession.totalQuestions} ({child.lastSession.accuracy}%)
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-400">Nenhuma sessão ainda</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Link
+                        href={`/painel/${child.id}`}
+                        className="flex-1 text-center py-2 bg-green-50 text-green-600 text-xs font-bold rounded-lg hover:bg-green-100"
+                      >
+                        Estatísticas
+                      </Link>
+                      <button
+                        onClick={() => {
+                          const opening = expandedChildId !== child.id
+                          setExpandedChildId(opening ? child.id : null)
+                          if (opening && !childFriends[child.id]) {
+                            fetchChildFriendsFor(child.id)
+                          }
+                        }}
+                        className="flex-1 text-center py-2 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 cursor-pointer"
+                      >
+                        {expandedChildId === child.id ? "Fechar" : "Configurações"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded settings */}
+                  <AnimatePresence>
+                    {expandedChildId === child.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 border-t border-gray-200 pt-3">
+                          {/* Social toggles */}
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm text-gray-700">Amizades</p>
+                            <button
+                              onClick={() => handleToggleChildSocial(child.id, "friendshipEnabled")}
+                              className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${child.friendshipEnabled ? "bg-green-500" : "bg-gray-300"}`}
+                              role="switch"
+                              aria-checked={child.friendshipEnabled}
+                              aria-label={`Habilitar amizades para ${child.name}`}
+                            >
+                              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${child.friendshipEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                            </button>
+                          </div>
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm text-gray-700">Desafios</p>
+                            <button
+                              onClick={() => handleToggleChildSocial(child.id, "challengeEnabled")}
+                              className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${child.challengeEnabled ? "bg-green-500" : "bg-gray-300"}`}
+                              role="switch"
+                              aria-checked={child.challengeEnabled}
+                              aria-label={`Habilitar desafios para ${child.name}`}
+                            >
+                              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${child.challengeEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                            </button>
+                          </div>
+
+                          {/* Child's friends */}
+                          {(childFriends[child.id] || []).length > 0 && (
+                            <div className="border-t border-gray-200 pt-3 mt-1">
+                              <p className="text-xs font-semibold text-gray-500 mb-2">
+                                Amigos ({childFriends[child.id].length})
+                              </p>
+                              <div className="flex flex-col gap-2">
+                                {childFriends[child.id].map((f) => (
+                                  <div key={f.friendshipId} className="flex items-center justify-between bg-white rounded-lg p-2">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-semibold text-gray-800 text-xs truncate">{f.name}</p>
+                                      {f.status === "BLOCKED" && (
+                                        <span className="text-[10px] text-red-500">Bloqueado</span>
+                                      )}
+                                    </div>
+                                    <div className="flex gap-1 shrink-0">
+                                      <button
+                                        onClick={() => handleBlockChildFriend(f.friendshipId, f.status === "BLOCKED", child.id)}
+                                        disabled={blockingId === f.friendshipId}
+                                        className={`px-2 py-1 text-[10px] font-bold rounded cursor-pointer disabled:opacity-50 ${
+                                          f.status === "BLOCKED"
+                                            ? "bg-green-50 text-green-600"
+                                            : "bg-red-50 text-red-500"
+                                        }`}
+                                      >
+                                        {f.status === "BLOCKED" ? "Desbloquear" : "Bloquear"}
+                                      </button>
+                                      {confirmDeleteFriend === f.friendshipId ? (
+                                        <div className="flex gap-1">
+                                          <button
+                                            onClick={() => handleDeleteChildFriend(f.friendshipId, child.id)}
+                                            disabled={deletingFriendId === f.friendshipId}
+                                            className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded cursor-pointer disabled:opacity-50"
+                                          >
+                                            {deletingFriendId === f.friendshipId ? "..." : "Sim"}
+                                          </button>
+                                          <button
+                                            onClick={() => setConfirmDeleteFriend(null)}
+                                            className="px-2 py-1 bg-gray-200 text-gray-600 text-[10px] font-bold rounded cursor-pointer"
+                                          >
+                                            Não
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          onClick={() => setConfirmDeleteFriend(f.friendshipId)}
+                                          className="px-2 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold rounded hover:bg-gray-200 cursor-pointer"
+                                        >
+                                          Excluir
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
           </div>
         )}

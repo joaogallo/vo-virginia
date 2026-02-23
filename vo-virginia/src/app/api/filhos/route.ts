@@ -18,9 +18,15 @@ export async function GET() {
           email: true,
           image: true,
           gameSessions: {
+            where: { completed: true },
             orderBy: { startedAt: "desc" },
             take: 1,
-            select: { startedAt: true },
+            select: {
+              startedAt: true,
+              operations: true,
+              totalQuestions: true,
+              correctAnswers: true,
+            },
           },
           friendshipEnabled: true,
           challengeEnabled: true,
@@ -30,16 +36,29 @@ export async function GET() {
     },
   })
 
-  const children = links.map((link) => ({
-    id: link.child.id,
-    name: link.child.name,
-    email: link.child.email,
-    image: link.child.image,
-    lastSessionAt: link.child.gameSessions[0]?.startedAt || null,
-    totalSessions: link.child._count.gameSessions,
-    friendshipEnabled: link.child.friendshipEnabled,
-    challengeEnabled: link.child.challengeEnabled,
-  }))
+  const children = links.map((link) => {
+    const lastGame = link.child.gameSessions[0]
+    return {
+      id: link.child.id,
+      name: link.child.name,
+      email: link.child.email,
+      image: link.child.image,
+      lastSessionAt: lastGame?.startedAt || null,
+      totalSessions: link.child._count.gameSessions,
+      friendshipEnabled: link.child.friendshipEnabled,
+      challengeEnabled: link.child.challengeEnabled,
+      lastSession: lastGame
+        ? {
+            operations: lastGame.operations,
+            totalQuestions: lastGame.totalQuestions,
+            correctAnswers: lastGame.correctAnswers,
+            accuracy: lastGame.totalQuestions > 0
+              ? Math.round((lastGame.correctAnswers / lastGame.totalQuestions) * 100)
+              : 0,
+          }
+        : null,
+    }
+  })
 
   return NextResponse.json({ children })
 }

@@ -1,6 +1,6 @@
 {
   "name": "vo-virginia",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "^6.19.2",
+    "@serwist/next": "^9.5.6",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^12.34.0",
     "lottie-react": "^2.4.1",
@@ -42,6 +43,7 @@
     "eslint-config-next": "16.1.6",
     "jsdom": "^28.1.0",
     "prisma": "^6.19.2",
+    "serwist": "^9.5.6",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.18"
