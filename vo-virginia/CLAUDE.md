@@ -2,7 +2,7 @@
 
 ## Visao Geral
 
-App web responsivo de pratica de matematica para criancas de 6-11 anos (Ensino Fundamental I). Portado de um CLI Python para Next.js com autenticacao, estatisticas avancadas, sistema de medalhas, feedback por email e painel para pais/professores.
+App web responsivo de pratica de matematica para criancas de 6-11 anos (Ensino Fundamental I). Portado de um CLI Python para Next.js com autenticacao, estatisticas avancadas, sistema de medalhas, feedback por email, painel para pais/professores, sistema social (amizades e desafios entre amigos) e PWA com suporte offline.
 
 **Producao:** [vo-virginia.vercel.app](https://vo-virginia.vercel.app)
 
@@ -85,6 +85,23 @@ Rotas usam **portugues** (publico-alvo brasileiro). Codigo interno em ingles.
 | `/painel` | Dashboard de pais/professores |
 | `/perfil` | Configuracoes do usuario |
 | `/feedback` | Formulario de feedback por email |
+| `/desafios` | Modos de desafio (solo e amigos) |
+| `/amigos` | Gerenciamento de amizades |
+| `/amigos/desafio/[id]` | Sessao de desafio entre amigos (tempo real) |
+| `/ranking` | Quadro de lideres da turma |
+
+### Sistema Social e Multiplayer
+
+- **Amizades**: criancas adicionam amigos por codigo; pais podem habilitar/desabilitar e bloquear amizades
+- **Desafios entre amigos**: pagina `/desafios` dividida em "Estudando sozinho" (4 modos solo) e "Estudando com amigos" (criar desafio, desafios pendentes/ativos/concluidos)
+- `FriendChallengeSetup` (`src/components/challenge/FriendChallengeSetup.tsx`) -- UI para criar desafio (selecionar amigo, operacoes, numeros, quantidade). Usa estado local (nao o game store)
+- `PendingChallenges` (`src/components/challenge/PendingChallenges.tsx`) -- lista de desafios pendentes, ativos e resultados recentes
+- A secao "Estudando com amigos" so aparece se `friendshipEnabled` e `challengeEnabled` estao habilitados no perfil
+- Questoes deterministicas via seed (`generateQuestionsWithSeed`) -- ambos jogadores recebem as mesmas questoes
+- Progresso do oponente em tempo real via polling (2.5s) usando `useChallengePolling`
+- APIs: `POST /api/desafios-amigo/` (criar), `POST .../responder` (aceitar/recusar), `PATCH .../progresso` (sync)
+- Notificacoes: `FRIEND_CHALLENGE_INVITE`, `FRIEND_CHALLENGE_RESULT`, `FRIEND_MEDAL_EARNED`
+- Validacao: `createChallengeSchema` exige `totalQuestions` entre 5 e 50
 
 ### Sistema de Medalhas
 
@@ -149,10 +166,19 @@ Config em `src/lib/auth.ts`. Usa JWT strategy (necessario para credentials provi
 - Suporta multiplos adultos por crianca
 - A crianca tambem pode vincular durante o cadastro (campo opcional)
 
+### PWA e Offline
+
+- Service worker via `@serwist/next` configurado em `src/sw.ts`
+- Pagina offline em `src/app/~offline/page.tsx`
+- `next.config.ts` usa `withSerwist` wrapper; requer `turbopack: {}` para compatibilidade com Turbopack
+- Arquivos gerados (`public/sw.js`, `public/sw.js.map`) estao no `.gitignore`
+
 ## Convencoes
 
 - Componentes do jogo em `src/components/game/`
+- Componentes de desafios em `src/components/challenge/`
 - Componentes de medalhas em `src/components/medals/`
+- Componentes de notificacoes em `src/components/notifications/`
 - Componentes de estatisticas em `src/components/stats/`
 - Validacao de API com Zod (`src/lib/validators.ts`)
 - Tipos em `src/types/game.ts` e `src/types/next-auth.d.ts`

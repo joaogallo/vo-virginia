@@ -116,6 +116,13 @@
 - [x] Documentação completa para contribuidores (CONTRIBUTING.md)
 - [x] Perfil de adultos com crianças vinculadas (dados da última sessão, configurações sociais, gerenciamento de amizades)
 
+## v1.1.0 — Desafios com Amigos na Página de Desafios (Concluído)
+
+- [x] Página de Desafios dividida em "Estudando sozinho" e "Estudando com amigos"
+- [x] Seção multiplayer visível apenas quando amizade e desafios estão habilitados no perfil
+- [x] Criar desafio entre amigos diretamente pela página de Desafios (selecionar amigo, operações, números, quantidade de questões)
+- [x] Painel de desafios pendentes: convites recebidos (aceitar/recusar), enviados (aguardando), ativos (continuar), resultados recentes
+
 ---
 
 ## Backlog

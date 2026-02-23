@@ -62,18 +62,7 @@ export default function ChallengeSetup({ onStart, reviewQuestionCount, loadingRe
   })()
 
   return (
-    <div className="flex flex-col items-center gap-5 w-full max-w-lg mx-auto px-4">
-      <motion.h1
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="font-display text-2xl sm:text-3xl font-bold text-gray-800 text-center"
-      >
-        Desafios
-      </motion.h1>
-      <p className="text-gray-600 text-center -mt-3">
-        Escolha um modo de desafio!
-      </p>
-
+    <div className="flex flex-col items-center gap-5 w-full">
       <ChallengeModeSelector
         selectedMode={selectedModeLocal}
         onSelectMode={handleSelectMode}

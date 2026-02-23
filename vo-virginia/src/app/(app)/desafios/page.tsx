@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { motion } from "framer-motion"
 import { useGameStore } from "@/stores/game-store"
 import { loadSession, clearSession } from "@/lib/session-storage"
 import { buildQuestion } from "@/lib/game-engine"
@@ -9,6 +11,8 @@ import type { PersistedSession } from "@/lib/session-storage"
 import type { Operation, Question, SessionMode } from "@/types/game"
 import ChallengeSetup from "@/components/challenge/ChallengeSetup"
 import ChallengeHistory from "@/components/challenge/ChallengeHistory"
+import FriendChallengeSetup from "@/components/challenge/FriendChallengeSetup"
+import PendingChallenges from "@/components/challenge/PendingChallenges"
 import SessionRecoveryDialog from "@/components/game/SessionRecoveryDialog"
 
 const OPERATION_MAP: Record<Operation, string> = {
@@ -36,6 +40,8 @@ const SESSION_MODE_API_MAP: Record<SessionMode, string> = {
 interface UserProfile {
   maxRetries: number
   defaultQuestionLimit: number | null
+  friendshipEnabled: boolean
+  challengeEnabled: boolean
 }
 
 interface MissedQuestion {
@@ -48,6 +54,7 @@ interface MissedQuestion {
 
 export default function DesafiosPage() {
   const router = useRouter()
+  const { data: sessionData } = useSession()
   const {
     startChallengeSession,
     setBackendSessionId,
@@ -187,13 +194,44 @@ export default function DesafiosPage() {
     )
   }
 
+  const showFriendSection = profile?.friendshipEnabled && profile?.challengeEnabled
+  const userId = sessionData?.user?.id
+
   return (
     <div className="w-full max-w-lg mx-auto px-4 py-8 flex flex-col gap-8">
-      <ChallengeSetup
-        onStart={handleStart}
-        reviewQuestionCount={reviewQuestions.length}
-        loadingReview={loadingReview}
-      />
+      <motion.h1
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="font-display text-2xl sm:text-3xl font-bold text-gray-800 text-center"
+      >
+        Desafios
+      </motion.h1>
+
+      {/* Estudando sozinho */}
+      <section>
+        <h2 className="font-display text-lg font-bold text-gray-600 mb-3 flex items-center gap-2">
+          <span className="text-xl">📚</span> Estudando sozinho
+        </h2>
+        <ChallengeSetup
+          onStart={handleStart}
+          reviewQuestionCount={reviewQuestions.length}
+          loadingReview={loadingReview}
+        />
+      </section>
+
+      {/* Estudando com amigos */}
+      {showFriendSection && userId && (
+        <section>
+          <h2 className="font-display text-lg font-bold text-gray-600 mb-3 flex items-center gap-2">
+            <span className="text-xl">👫</span> Estudando com amigos
+          </h2>
+          <div className="flex flex-col gap-4">
+            <PendingChallenges userId={userId} />
+            <FriendChallengeSetup />
+          </div>
+        </section>
+      )}
+
       <ChallengeHistory />
     </div>
   )

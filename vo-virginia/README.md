@@ -19,6 +19,10 @@ As operacoes aparecem em cartas estilo baralho com numeros grandes, acompanhadas
 - **Autenticacao**: email/senha, Google e Microsoft
 - **Painel de pais/professores**: acompanhar progresso das criancas vinculadas
 - **Vinculacao pai-filho**: sistema de codigos para vincular contas de adultos e criancas
+- **Social e multiplayer**: sistema de amizade por codigo, desafios entre amigos em tempo real, quadro de lideres
+- **Desafios com amigos**: criar desafios diretamente pela pagina de Desafios, aceitar/recusar convites, resultados com placar
+- **PWA**: suporte offline via service worker (Serwist)
+- **LGPD**: termos de uso e politica de privacidade
 - **Responsivo**: funciona em celular, tablet e desktop
 
 ## Stack
@@ -89,13 +93,17 @@ src/
       resultado/        # Resumo da sessao com notificacao de medalhas
       estatisticas/     # Estatisticas pessoais com graficos
       medalhas/         # Galeria de medalhas conquistadas
+      desafios/         # Modos de desafio (solo e amigos)
       perfil/           # Configuracoes do usuario
+      amigos/           # Amizades e desafios entre amigos
       painel/           # Dashboard de pais/professores
       feedback/         # Formulario de feedback
     api/                # API REST
       sessoes/          # CRUD de sessoes e respostas
       estatisticas/     # Agregacoes de estatisticas
       medalhas/         # Consulta e verificacao de medalhas
+      desafios-amigo/   # Desafios entre amigos (criar, responder, progresso)
+      amizades/         # Gerenciamento de amizades
       feedback/         # Envio de email de feedback
       auth/             # Registro, login, alteracao de senha
       perfil/           # Perfil do usuario
@@ -104,10 +112,12 @@ src/
       grupos/           # Grupos de criancas
   components/
     game/               # Carta, teclado, avatar, timer, resumo
+    challenge/          # Modos de desafio solo e multiplayer
     medals/             # Notificacao de medalhas
     stats/              # Graficos, filtros, ranking, sessoes
     dashboard/          # Componentes do painel
     groups/             # Gerenciador de grupos
+    notifications/      # Sino e dropdown de notificacoes
   lib/
     game-engine.ts      # Logica matematica (core)
     auth.ts             # Configuracao NextAuth
