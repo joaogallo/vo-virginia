@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -21,6 +21,7 @@ interface Challenge {
   challengerCorrect: number
   challengedCorrect: number
   createdAt: string
+  expiresAt: string | null
 }
 
 const OP_SYMBOL: Record<string, string> = {
@@ -28,6 +29,41 @@ const OP_SYMBOL: Record<string, string> = {
   SUBTRACTION: "−",
   MULTIPLICATION: "×",
   DIVISION: "÷",
+}
+
+function ExpiryCountdown({ expiresAt, onExpired }: { expiresAt: string; onExpired?: () => void }) {
+  const [remaining, setRemaining] = useState(() => {
+    const ms = new Date(expiresAt).getTime() - Date.now()
+    return Math.max(0, Math.ceil(ms / 1000))
+  })
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      onExpired?.()
+      return
+    }
+    const timer = setInterval(() => {
+      const ms = new Date(expiresAt).getTime() - Date.now()
+      const secs = Math.max(0, Math.ceil(ms / 1000))
+      setRemaining(secs)
+      if (secs <= 0) {
+        clearInterval(timer)
+        onExpired?.()
+      }
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [expiresAt, remaining, onExpired])
+
+  const mins = Math.floor(remaining / 60)
+  const secs = remaining % 60
+
+  const isUrgent = remaining <= 60
+
+  return (
+    <span className={`text-xs font-bold ${isUrgent ? "text-red-500" : "text-orange-500"}`}>
+      {mins}:{secs.toString().padStart(2, "0")}
+    </span>
+  )
 }
 
 interface PendingChallengesProps {
@@ -39,6 +75,7 @@ export default function PendingChallenges({ userId }: PendingChallengesProps) {
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [loading, setLoading] = useState(true)
   const [responding, setResponding] = useState<string | null>(null)
+  const prevSentPendingRef = useRef<Set<string>>(new Set())
 
   const fetchChallenges = useCallback(async () => {
     try {
@@ -56,6 +93,53 @@ export default function PendingChallenges({ userId }: PendingChallengesProps) {
     fetchChallenges()
   }, [fetchChallenges])
 
+  // Poll every 5s when there are pending sent challenges — detect PENDING→ACTIVE transition
+  useEffect(() => {
+    const sentPending = challenges.filter((c) => c.challengerId === userId && c.status === "PENDING")
+    if (sentPending.length === 0) {
+      prevSentPendingRef.current = new Set()
+      return
+    }
+
+    // Update the ref with current pending IDs
+    const currentPendingIds = new Set(sentPending.map((c) => c.id))
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/desafios-amigo")
+        const data = await res.json()
+        const updated: Challenge[] = data.challenges || []
+        setChallenges(updated)
+
+        // Check if any previously PENDING sent challenge is now ACTIVE
+        for (const c of updated) {
+          if (
+            c.challengerId === userId &&
+            c.status === "ACTIVE" &&
+            prevSentPendingRef.current.has(c.id)
+          ) {
+            // Redirect challenger to the challenge page
+            router.push(`/amigos/desafio/${c.id}`)
+            return
+          }
+        }
+
+        // Update ref with new pending IDs
+        const newPendingIds = new Set(
+          updated.filter((c) => c.challengerId === userId && c.status === "PENDING").map((c) => c.id)
+        )
+        prevSentPendingRef.current = newPendingIds
+      } catch {
+        // silent
+      }
+    }, 5000)
+
+    // Initialize ref
+    prevSentPendingRef.current = currentPendingIds
+
+    return () => clearInterval(interval)
+  }, [challenges, userId, router])
+
   const handleRespond = async (challengeId: string, action: "ACCEPT" | "DECLINE") => {
     setResponding(challengeId)
     try {
@@ -68,6 +152,11 @@ export default function PendingChallenges({ userId }: PendingChallengesProps) {
         router.push(`/amigos/desafio/${challengeId}`)
         return
       }
+      if (res.status === 410) {
+        // Challenge expired — refresh list
+        fetchChallenges()
+        return
+      }
       // Refresh list after declining
       fetchChallenges()
     } catch {
@@ -76,6 +165,10 @@ export default function PendingChallenges({ userId }: PendingChallengesProps) {
       setResponding(null)
     }
   }
+
+  const handleExpired = useCallback(() => {
+    fetchChallenges()
+  }, [fetchChallenges])
 
   if (loading) {
     return <p className="text-gray-400 text-sm animate-pulse text-center">Carregando desafios...</p>
@@ -114,6 +207,9 @@ export default function PendingChallenges({ userId }: PendingChallengesProps) {
                     {ops} · {c.totalQuestions} questões
                   </p>
                 </div>
+                {c.expiresAt && (
+                  <ExpiryCountdown expiresAt={c.expiresAt} onExpired={handleExpired} />
+                )}
               </div>
               <div className="flex gap-2">
                 <button
@@ -181,6 +277,9 @@ export default function PendingChallenges({ userId }: PendingChallengesProps) {
               {c.operations.map((o) => OP_SYMBOL[o] || o).join(" ")} · {c.totalQuestions} questões
             </p>
           </div>
+          {c.expiresAt && (
+            <ExpiryCountdown expiresAt={c.expiresAt} onExpired={handleExpired} />
+          )}
         </div>
       ))}
 

@@ -286,7 +286,11 @@ model FriendChallenge {
   challengedFinished Boolean @default(false)
   challengedTime     Int?
 
+  challengerInactivity Boolean @default(false)
+  challengedInactivity Boolean @default(false)
+
   createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
   startedAt   DateTime?
   completedAt DateTime?
   updatedAt   DateTime  @updatedAt

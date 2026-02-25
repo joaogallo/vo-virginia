@@ -9,6 +9,7 @@ interface PlayerProgress {
   wrong: number
   finished: boolean
   timeMs: number | null
+  inactivity: boolean
 }
 
 interface ChallengeProgress {

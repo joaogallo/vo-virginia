@@ -104,6 +104,7 @@ export const updateChallengeProgressSchema = z.object({
   wrong: z.number().int().min(0),
   finished: z.boolean(),
   timeMs: z.number().int().optional(),
+  inactivity: z.boolean().optional(),
 })
 
 export const updateGroupLeaderboardSchema = z.object({

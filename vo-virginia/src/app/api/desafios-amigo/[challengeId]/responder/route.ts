@@ -34,6 +34,15 @@ export async function POST(
     return NextResponse.json({ error: "Desafio não encontrado" }, { status: 404 })
   }
 
+  // Check if challenge has expired
+  if (challenge.expiresAt && new Date() > challenge.expiresAt) {
+    await prisma.friendChallenge.update({
+      where: { id: challengeId },
+      data: { status: "CANCELLED" },
+    })
+    return NextResponse.json({ error: "Este desafio expirou" }, { status: 410 })
+  }
+
   if (parsed.data.action === "ACCEPT") {
     await prisma.friendChallenge.update({
       where: { id: challengeId },

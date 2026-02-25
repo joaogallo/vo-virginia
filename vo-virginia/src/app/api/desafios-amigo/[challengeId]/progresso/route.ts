@@ -42,6 +42,7 @@ export async function GET(
       wrong: challenge.challengerWrong,
       finished: challenge.challengerFinished,
       timeMs: challenge.challengerTime,
+      inactivity: challenge.challengerInactivity,
     },
     challenged: {
       id: challenge.challenged.id,
@@ -50,6 +51,7 @@ export async function GET(
       wrong: challenge.challengedWrong,
       finished: challenge.challengedFinished,
       timeMs: challenge.challengedTime,
+      inactivity: challenge.challengedInactivity,
     },
   })
 }
@@ -86,7 +88,7 @@ export async function PATCH(
   }
 
   const isChallenger = challenge.challengerId === session.user.id
-  const { correct, wrong, finished, timeMs } = parsed.data
+  const { correct, wrong, finished, timeMs, inactivity } = parsed.data
 
   const updateData: Record<string, unknown> = isChallenger
     ? {
@@ -94,12 +96,14 @@ export async function PATCH(
         challengerWrong: wrong,
         challengerFinished: finished,
         ...(timeMs !== undefined ? { challengerTime: timeMs } : {}),
+        ...(inactivity ? { challengerInactivity: true } : {}),
       }
     : {
         challengedCorrect: correct,
         challengedWrong: wrong,
         challengedFinished: finished,
         ...(timeMs !== undefined ? { challengedTime: timeMs } : {}),
+        ...(inactivity ? { challengedInactivity: true } : {}),
       }
 
   const updated = await prisma.friendChallenge.update({

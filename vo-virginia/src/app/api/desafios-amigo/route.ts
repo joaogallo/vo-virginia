@@ -18,6 +18,7 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   }
 
+  const now = new Date()
   const challenges = await prisma.friendChallenge.findMany({
     where: {
       OR: [
@@ -25,6 +26,11 @@ export async function GET() {
         { challengedId: session.user.id },
       ],
       status: { in: ["PENDING", "ACTIVE", "COMPLETED"] },
+      // Exclude expired PENDING challenges
+      NOT: {
+        status: "PENDING",
+        expiresAt: { lt: now },
+      },
     },
     include: {
       challenger: { select: { id: true, name: true } },
@@ -88,6 +94,8 @@ export async function POST(req: NextRequest) {
 
   const seed = generateSeed()
 
+  const CHALLENGE_EXPIRY_MS = 5 * 60 * 1000
+
   const challenge = await prisma.friendChallenge.create({
     data: {
       challengerId: session.user.id,
@@ -96,6 +104,7 @@ export async function POST(req: NextRequest) {
       numbers,
       totalQuestions,
       questionsSeed: seed,
+      expiresAt: new Date(Date.now() + CHALLENGE_EXPIRY_MS),
     },
   })
 
